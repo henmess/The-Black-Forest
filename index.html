@@ -45,6 +45,7 @@ window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
     return cache[key].then(function(j){
       var o = j.originalimage, t = j.thumbnail;
       if (!o && !t) throw 0;
+      if (/\.svg/i.test((o || t).source)) throw 0; // a logo or coat of arms, not a photo
       var src = (o && o.width <= w) || !t ? o.source : t.source.replace(/\/\d+px-/, "/" + w + "px-");
       return { src: src, page: j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page };
     });
@@ -701,7 +702,7 @@ img.img-failed{display:none}
       </div>
     </article>
     <article class="stay titisee">
-      <div class="ph" data-img="img/hotels/maritim-titisee.jpg|wiki:Titisee|wiki:de:Titisee" data-fallback="🌲"></div>
+      <div class="ph" data-img="img/hotels/maritim-titisee.jpg|commons:Maritim Titisee Hotel 馬里提姆蒂蒂湖旅館 - panoramio.jpg|commons:Landappbw 871617 1822 Maritim Hotel Titisee, Titisee-Neustadt.jpg|wiki:Titisee|wiki:de:Titisee" data-fallback="🌲"></div>
       <div class="body">
         <span class="nights">לילות 7–13 · 21–28.8</span>
         <h3>Maritim TitiseeHotel</h3>
@@ -761,7 +762,7 @@ img.img-failed{display:none}
 <!-- ================= DAY 2 ================= -->
 <article class="day" id="day2">
   <div class="day-head">
-    <div class="ph" data-img="wiki:Petite France (Strasbourg)|wiki:Ponts Couverts|wiki:Strasbourg" data-fallback="⛪"></div>
+    <div class="ph" data-img="commons:Straßburg (Frankreich), Petite France -- 2011 -- 1759.jpg|wiki:Petite France (Strasbourg)|wiki:Ponts Couverts|wiki:Strasbourg" data-fallback="⛪"></div>
     <div class="day-title">
       <span class="day-num">יום שני · 16.8</span>
       <h3>שטרסבורג: הקתדרלה, פטיט פראנס ושייט בתעלות</h3>
@@ -787,7 +788,7 @@ img.img-failed{display:none}
       <div>
         <div class="gallery">
           <div class="ph wide" data-img="wiki:Strasbourg Cathedral|wiki:Strasbourg" data-label="קתדרלת שטרסבורג" data-fallback="⛪"></div>
-          <div class="ph" data-img="wiki:Ponts Couverts|wiki:Petite France (Strasbourg)" data-label="הגשרים המקורים" data-fallback="🏘️"></div>
+          <div class="ph" data-img="wiki:Ponts Couverts|commons:2007, Petite France à Strasbourg 5.jpg|wiki:Petite France (Strasbourg)" data-label="הגשרים המקורים" data-fallback="🏘️"></div>
           <div class="ph" data-img="wiki:Parc de l'Orangerie|wiki:fr:Parc de l'Orangerie" data-label="פארק האורנז׳רי" data-fallback="🦩"></div>
         </div>
         <div class="tip"><b>🚗 לא נכנסים עם הרכב לעיר:</b> בשטרסבורג יש אזור מוגבל לרכבים מזהמים (ZFE), ורכב שכור מגרמניה צריך מדבקת Crit'Air. הכי פשוט לחנות בחניון P+R (למשל Rotonde או Elsau). כרטיס החניה היומי כולל נסיעה בחשמלית הלוך וחזור לכל מי שברכב, בכמה יורו בלבד.</div>
@@ -824,7 +825,7 @@ img.img-failed{display:none}
         <div class="gallery">
           <div class="ph wide" data-img="wiki:Silver Star (roller coaster)|wiki:Europa-Park" data-label="Silver Star" data-fallback="🎢"></div>
           <div class="ph" data-img="wiki:Blue Fire (roller coaster)|wiki:de:Blue Fire Megacoaster" data-label="Blue Fire" data-fallback="🎢"></div>
-          <div class="ph" data-img="wiki:de:Europa-Park|wiki:Europa-Park" data-label="פארק אירופה" data-fallback="🎡"></div>
+          <div class="ph" data-img="commons:Europa-Park panorama 2026.jpg|wiki:Europa-Park" data-label="פארק אירופה" data-fallback="🎡"></div>
         </div>
         <div class="tip"><b>🎟️ להזמין מראש:</b> קונים כרטיסים מתוארכים באונליין. אמצע אוגוסט הוא עונת שיא, וגם בגרמניה וגם בצרפת עדיין יש חופש גדול. ילדים עד גיל 3 נכנסים בחינם, ומגיל 4 עד 11 משלמים מחיר ילד. באפליקציה של הפארק רואים את זמני ההמתנה בכל מתקן.</div>
       </div>
@@ -864,7 +865,7 @@ img.img-failed{display:none}
         <div class="gallery">
           <div class="ph wide" data-img="wiki:fr:Petite Venise (Colmar)|wiki:Colmar" data-label="ונציה הקטנה, קולמר" data-fallback="🛶"></div>
           <div class="ph" data-img="wiki:Riquewihr|wiki:fr:Riquewihr" data-label="ריקוויר" data-fallback="🍷"></div>
-          <div class="ph" data-img="wiki:Montagne des Singes|wiki:fr:Montagne des singes|wiki:Barbary macaque" data-label="הר הקופים" data-fallback="🐒"></div>
+          <div class="ph" data-img="commons:Montagne des singes (Kintzheim) (2).jpg|wiki:Montagne des Singes|wiki:fr:Montagne des singes|wiki:Barbary macaque" data-label="הר הקופים" data-fallback="🐒"></div>
         </div>
         <div class="tip"><b>💡 טיפ:</b> בקולמר כדאי לחנות בחניון Lacarre או Rapp, שניהם במרחק הליכה מונציה הקטנה. בהר הקופים לא נוגעים בקופים ומאכילים רק בפופקורן שמקבלים בכניסה. ביום חם מגיעים לשם אחרי 15:00, כשהקופים פעילים יותר.</div>
         <div class="alt"><b>חלופה:</b> במקום ריקוויר אפשר לנסוע לקייזרסברג (Kaysersberg), שגם היא עיירה ציורית על דרך היין. ילדים שאוהבים טירות יאהבו את טירת Haut-Kœnigsbourg, שנמצאת 10 דק׳ מהר הקופים.</div>
@@ -876,7 +877,7 @@ img.img-failed{display:none}
 <!-- ================= DAY 5 ================= -->
 <article class="day" id="day5">
   <div class="day-head">
-    <div class="ph" data-img="wiki:de:Rulantica|wiki:Rulantica|wiki:Europa-Park" data-fallback="🌊"></div>
+    <div class="ph" data-img="commons:Rulantica wellenbecken.jpg|commons:Rulantica v.2.jpg|wiki:de:Rulantica|wiki:Rulantica|wiki:Europa-Park" data-fallback="🌊"></div>
     <div class="day-title">
       <span class="day-num">יום חמישי · 19.8</span>
       <h3>רולנטיקה ← נסיעה לזינגן</h3>
@@ -901,7 +902,7 @@ img.img-failed{display:none}
       </ol>
       <div>
         <div class="gallery">
-          <div class="ph wide" data-img="wiki:de:Rulantica|wiki:Rulantica" data-label="רולנטיקה" data-fallback="🌊"></div>
+          <div class="ph wide" data-img="commons:Rulantica wellenbecken.jpg|commons:Rulantica v.2.jpg|wiki:de:Rulantica|wiki:Rulantica" data-label="רולנטיקה" data-fallback="🌊"></div>
         </div>
         <div class="tip"><b>🎟️ להזמין מראש!</b> בקיץ הכרטיסים לרולנטיקה נגמרים, ובקופה לא תמיד יש כרטיסים. המחיר תלוי ביום. ילדים עד גיל 3 נכנסים בחינם. מומלץ להגיע לפתיחה ולתפוס כיסאות נוח.</div>
         <div class="alt"><b>מסלול חלופי:</b> אם רוצים פחות פארק מים, נשארים ברולנטיקה עד הצהריים ויוצאים מוקדם יותר. בדרך עוצרים בתחנה התחתונה של הרכבל בפרייבורג, או בעיירה טיטיזה.</div>
@@ -983,7 +984,7 @@ img.img-failed{display:none}
         <div class="gallery">
           <div class="ph wide" data-img="wiki:Rhine Falls|wiki:de:Rheinfall" data-label="מפלי הריין" data-fallback="💦"></div>
           <div class="ph" data-img="wiki:Imperia (statue)|wiki:Konstanz" data-label="פסל האימפריה, קונסטנץ" data-fallback="⛵"></div>
-          <div class="ph" data-img="wiki:Laufen Castle|wiki:de:Schloss Laufen" data-label="טירת לאופן מעל המפלים" data-fallback="🏰"></div>
+          <div class="ph" data-img="commons:Schloss Laufen am Rheinfall (2023).jpg|wiki:Laufen Castle|wiki:de:Schloss Laufen" data-label="טירת לאופן מעל המפלים" data-fallback="🏰"></div>
         </div>
         <div class="tip"><b>💡 טיפ:</b> במפלי הריין חונים בצד של נויהאוזן (Rheinfallquai), שם קרוב לסירות. משלמים בפרנקים או בכרטיס אשראי. בקונסטנץ חונים בחניון Döbele או Altstadt.</div>
         <div class="alt"><b>חלופה:</b> בבוקר אפשר לעלות על ספינה מקונסטנץ למירסבורג (Meersburg), שמעבר לאגם, או במעבורת הרכבים. זה קצת מאריך את היום.</div>
@@ -1064,8 +1065,8 @@ img.img-failed{display:none}
       <div>
         <div class="gallery">
           <div class="ph wide" data-img="wiki:de:Todtnauer Wasserfall|wiki:Todtnau" data-label="מפל טודנאו" data-fallback="💧"></div>
-          <div class="ph" data-img="wiki:de:Hasenhorn (Schwarzwald)|wiki:de:Hasenhorn|wiki:Todtnau" data-label="האזנהורן" data-fallback="🛷"></div>
-          <div class="ph" data-img="wiki:de:Hängebrücke Todtnau|wiki:de:Todtnau" data-label="הגשר התלוי בטודנאו" data-fallback="🌉"></div>
+          <div class="ph" data-img="commons:Todtnau Rodelbahn.JPG|wiki:de:Hasenhorn|wiki:de:Hasenhorn (Schwarzwald)|wiki:de:Hasenhorn|wiki:Todtnau" data-label="האזנהורן" data-fallback="🛷"></div>
+          <div class="ph" data-img="commons:Baden-Württemberg Todtnau Blackforestline Hängebrücke 02.jpg|wiki:de:Hängebrücke Todtnau|wiki:de:Todtnau" data-label="הגשר התלוי בטודנאו" data-fallback="🌉"></div>
         </div>
         <div class="tip"><b>💶 המגלשה לא בכרטיס:</b> לפי האתר של מפעיל ההאזנהורן, הם לא שותפים של הכרטיס האדום. קונים כרטיסים רק בקופה במקום, ויש כרטיסים משולבים לכמה נסיעות. במפל ובגשר בעלי הכרטיס מקבלים לפעמים הנחה או כניסה חינם, ולכן כדאי להראות את הכרטיס בקופה.</div>
         <div class="opts"><b class="h">🎟️ עוד אפשרויות קרובות</b><ul>
@@ -1227,7 +1228,7 @@ img.img-failed{display:none}
         <div class="gallery">
           <div class="ph wide" data-img="wiki:Belchen (Black Forest)|wiki:de:Belchen (Schwarzwald)" data-label="פסגת הבלכן" data-fallback="🚠"></div>
           <div class="ph" data-img="wiki:Staufen im Breisgau|wiki:de:Staufen im Breisgau" data-label="שטאופן" data-fallback="🏘️"></div>
-          <div class="ph" data-img="wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" data-label="מינסטרטל" data-fallback="⛏️"></div>
+          <div class="ph" data-img="commons:Teufelsgrund Hauptstollen Mundloch.jpg|commons:Grube Teufelsgrund - Münstertal 05.jpg|wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" data-label="מינסטרטל" data-fallback="⛏️"></div>
         </div>
         <div class="tip"><b>💡 טיפ:</b> לפי מקורות קודמים, הכרטיס האדום כולל את רכבל הבלכן רק בעונת החורף. בקיץ, לבדוק בקופה אם יש הנחה. אם ההר בעננים (רואים במצלמות), מחליפים את הסדר: בבוקר המכרה ושטאופן, ואחר הצהריים הבלכן.</div>
         <div class="opts"><b class="h">🛷 רוצים עוד מגלשת הרים?</b><ul>
@@ -1285,7 +1286,7 @@ img.img-failed{display:none}
 <!-- ================= DAY 15 ================= -->
 <article class="day" id="day15">
   <div class="day-head">
-    <div class="ph" data-img="wiki:Frankfurt Airport|wiki:Frankfurt" data-fallback="✈️"></div>
+    <div class="ph" data-img="commons:Frankfurt Flughafen, Terminal 1, Abflughalle B.jpg|wiki:Frankfurt Airport|wiki:Frankfurt" data-fallback="✈️"></div>
     <div class="day-title">
       <span class="day-num">יום ראשון · 29.8</span>
       <h3>החזרת הרכב וטיסה הביתה ✈️</h3>
@@ -1691,7 +1692,7 @@ window.CATALOG = [
   { n: "אוטובוסים ורכבות (KONUS)", e: "🚆", st: "inc", t: ["city","rain"], town: "כל האזור", drive: 0, ll: [47.9036, 8.1556], day: "day10",
     p: "נסיעה חינם בתחבורה הציבורית ביער השחור, כולל הרכבת מטיטיזה לפרייבורג והחשמליות בעיר.", price: "חינם לאורך כל השהייה", img: "wiki:Höllentalbahn (Black Forest)|wiki:de:Höllentalbahn (Schwarzwald)" },
   { n: "Hasenhorn Coaster, טודנאו", e: "🛷", st: "pay", t: ["coaster","cable"], town: "טודנאו", drive: 40, ll: [47.8231, 7.9442], day: "day9",
-    p: "מגלשת ההרים הארוכה בגרמניה (2.9 ק״מ), עם רכבל כיסאות לפסגה. מגיל 3 עם מבוגר.", price: "נסיעה בערך €11 למבוגר / €8.50 לילד (בקופה בלבד)", img: "wiki:de:Hasenhorn (Schwarzwald)|wiki:Todtnau" },
+    p: "מגלשת ההרים הארוכה בגרמניה (2.9 ק״מ), עם רכבל כיסאות לפסגה. מגיל 3 עם מבוגר.", price: "נסיעה בערך €11 למבוגר / €8.50 לילד (בקופה בלבד)", img: "commons:Todtnau Rodelbahn.JPG|wiki:de:Hasenhorn|wiki:de:Hasenhorn (Schwarzwald)|wiki:Todtnau" },
   { n: "מפל טודנאו והגשר התלוי", e: "💧", st: "chk", t: ["nature"], town: "טודנאו", drive: 40, ll: [47.8461, 7.9583], day: "day9",
     p: "מפל של 97 מ׳ וגשר תלוי (blackforestline) של כ־450 מ׳ מעל העמק. מסלול עם מדרגות.", price: "מפל כ־€3. לבעלי כרטיס לפעמים חינם או בהנחה", img: "wiki:de:Todtnauer Wasserfall|wiki:Todtnau" },
   { n: "רכבל השאואינסלנד", e: "🚡", st: "chk", t: ["cable"], town: "פרייבורג", drive: 50, ll: [47.9353, 7.8650], day: "day10",
@@ -1711,7 +1712,7 @@ window.CATALOG = [
   { n: "מוזיאון הכפר Vogtsbauernhof", e: "🏡", st: "pay", t: ["rain","city"], town: "גוטאך", drive: 60, ll: [48.2275, 8.2006], day: "day14",
     p: "חוות היער השחור המקוריות, עם בעלי חיים ומלאכות מסורתיות. חלק גדול מהמוזיאון בתוך מבנים.", price: "בערך €13 למבוגר, ילדים בהנחה", img: "wiki:Black Forest Open Air Museum|wiki:de:Schwarzwälder Freilichtmuseum Vogtsbauernhof" },
   { n: "מכרה הכסף Teufelsgrund", e: "⛏️", st: "chk", t: ["rain"], town: "מינסטרטל", drive: 55, ll: [47.8517, 7.8064], day: "day13",
-    p: "סיור מודרך עם קסדות במנהרות של מכרה ישן. 10° בפנים כל השנה.", price: "בערך €7 למבוגר / €4 לילד", img: "wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" },
+    p: "סיור מודרך עם קסדות במנהרות של מכרה ישן. 10° בפנים כל השנה.", price: "בערך €7 למבוגר / €4 לילד", img: "commons:Teufelsgrund Hauptstollen Mundloch.jpg|commons:Grube Teufelsgrund - Münstertal 05.jpg|wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" },
   { n: "Badeparadies Schwarzwald", e: "🏊", st: "chk", t: ["rain","park"], town: "טיטיזה", drive: 5, ll: [47.9070, 8.1440], day: "day12",
     p: "בריכה מקורה עם מגלשות ואזור ילדים. מתאימה ליום גשם בלבד, כי כבר היינו ברולנטיקה.", price: "בכרטיס: מחיר מוזל", img: "wiki:de:Badeparadies Schwarzwald|wiki:Titisee" },
   { n: "Tatzmania, לפינגן", e: "🎠", st: "inc", t: ["park"], town: "לפינגן", drive: 20, ll: [47.8836, 8.3542], day: "day11",
@@ -2397,7 +2398,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
   var HOTELS = [
     { n: "DiMas Hotel Ettenheim-Rust", ph: "img/hotels/dimas.jpg|wiki:de:Ettenheim|wiki:Ettenheim", d: "אטנהיים · לילות 1–4 (15–19.8)", ll: [48.2585, 7.7905], c: "#d0632f", day: "day1", short: "רוסט" },
     { n: "Holiday Inn Express Singen", ph: "img/hotels/holiday-inn-singen.jpg|wiki:de:Hohentwiel|wiki:Singen", d: "זינגן · לילות 5–6 (19–21.8)", ll: [47.7600, 8.8400], c: "#2d6fa8", day: "day5", short: "זינגן" },
-    { n: "Maritim TitiseeHotel", ph: "img/hotels/maritim-titisee.jpg|wiki:Titisee", d: "טיטיזה · לילות 7–13 (21–28.8)", ll: [47.9030, 8.1560], c: "#2f8a4f", day: "day7", short: "טיטיזה" },
+    { n: "Maritim TitiseeHotel", ph: "img/hotels/maritim-titisee.jpg|commons:Maritim Titisee Hotel 馬里提姆蒂蒂湖旅館 - panoramio.jpg|commons:Landappbw 871617 1822 Maritim Hotel Titisee, Titisee-Neustadt.jpg|wiki:Titisee", d: "טיטיזה · לילות 7–13 (21–28.8)", ll: [47.9030, 8.1560], c: "#2f8a4f", day: "day7", short: "טיטיזה" },
     { n: "Zleep Hotel Frankfurt Airport", ph: "img/hotels/zleep-frankfurt.jpg|wiki:Kelsterbach", d: "קלסטרבאך · לילה 14 (28.8)", ll: [50.0560, 8.5370], c: "#8a4fb0", day: "day14", short: "Zleep" }
   ];
   var AIRPORT = { n: "שדה התעופה פרנקפורט (FRA)", d: "נחיתה 15.8 · המראה 29.8", ll: [50.0379, 8.5622], day: "day1" };
@@ -2407,8 +2408,8 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     { n: "פארק אירופה", ph: "wiki:Europa-Park", e: "🎢", d: "שלישי 17.8", ll: [48.2660, 7.7220], day: "day3" },
     { n: "קולמר", ph: "wiki:Colmar", e: "🛶", d: "רביעי 18.8", ll: [48.0740, 7.3580], day: "day4" },
     { n: "ריקוויר", ph: "wiki:Riquewihr", e: "🍷", d: "רביעי 18.8", ll: [48.1667, 7.2983], day: "day4" },
-    { n: "הר הקופים", ph: "wiki:Montagne des Singes", e: "🐒", d: "רביעי 18.8", ll: [48.2550, 7.3780], day: "day4" },
-    { n: "רולנטיקה", ph: "wiki:de:Rulantica", e: "🌊", d: "חמישי 19.8", ll: [48.2620, 7.7350], day: "day5" },
+    { n: "הר הקופים", ph: "commons:Montagne des singes (Kintzheim) (2).jpg|wiki:Montagne des Singes", e: "🐒", d: "רביעי 18.8", ll: [48.2550, 7.3780], day: "day4" },
+    { n: "רולנטיקה", ph: "commons:Rulantica wellenbecken.jpg|commons:Rulantica v.2.jpg|wiki:de:Rulantica", e: "🌊", d: "חמישי 19.8", ll: [48.2620, 7.7350], day: "day5" },
     { n: "בית השוקולד של לינדט", ph: "wiki:Lindt Home of Chocolate|wiki:Lindt & Sprüngli", e: "🍫", d: "שישי 20.8", ll: [47.3233, 8.5530], day: "day6" },
     { n: "אי מיינאו", ph: "wiki:Mainau", e: "🌷", d: "שישי 20.8", ll: [47.7050, 9.1950], day: "day6" },
     { n: "נמל קונסטנץ", ph: "wiki:Imperia (statue)|wiki:Konstanz", e: "⛵", d: "שבת 21.8", ll: [47.6590, 9.1780], day: "day7" },

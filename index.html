@@ -1,0 +1,2493 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>טיול ליער השחור</title>
+<link rel="manifest" href="app.webmanifest?v=1">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/forest-32.png?v=1">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/forest-48.png?v=1">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/forest-apple-180.png?v=1">
+<meta name="theme-color" content="#1f6f68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="היער השחור">
+<meta name="application-name" content="היער השחור">
+<meta name="description" content="מסלול הטיול המשפחתי שלנו ליער השחור, לאלזס ולאגם קונסטנץ, 15–29 באוגוסט: לו״ז יומי, אטרקציות בכרטיס האדום, מסעדות, מזג אוויר ועלויות.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script>
+/* Photos: "wiki:Title" / "wiki:de:Title" = the lead image of a Wikipedia article (REST API, CORS-enabled),
+   "img/..." or "https://..." = our own file. Every photo has a list of candidates and falls back to an emoji. */
+window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
+(function(){
+  var cache = {};
+  function wiki(name){
+    var m = /^wiki:(?:([a-z]{2}):)?(.+)$/.exec(name);
+    if (!m) return null;
+    return { lang: m[1] || "en", title: m[2].trim() };
+  }
+  window.resolveImg = function(name, w){
+    if (isOwnImg(name)) return Promise.resolve({ src: name });
+    var wk = wiki(name);
+    if (!wk) return Promise.reject();
+    var key = wk.lang + ":" + wk.title;
+    if (!cache[key]) cache[key] = fetch("https://" + wk.lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(wk.title.replace(/ /g, "_")))
+      .then(function(r){ if (!r.ok) throw 0; return r.json(); });
+    return cache[key].then(function(j){
+      var o = j.originalimage, t = j.thumbnail;
+      if (!o && !t) throw 0;
+      var src = (o && o.width <= w) || !t ? o.source : t.source.replace(/\/\d+px-/, "/" + w + "px-");
+      return { src: src, page: j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page };
+    });
+  };
+  /* fill <img> from a "a|b|c" candidate list; calls ok(result) when one loads */
+  window.fillImg = function(img, list, w, ok){
+    var i = 0;
+    (function next(){
+      if (i >= list.length){ img.onerror = null; img.classList.add("img-failed"); if (img._fail) img._fail(); return; }
+      resolveImg(list[i++], w).then(function(r){
+        img.onerror = next;
+        img.onload = function(){ img.onload = null; if (ok) ok(r); };
+        img.src = r.src;
+      }, next);
+    })();
+  };
+  /* <img data-imgs="a|b" data-w="120"> placeholders (map markers, popups) */
+  window.hydrateImgs = function(root){
+    (root || document).querySelectorAll("img[data-imgs]").forEach(function(img){
+      var list = img.getAttribute("data-imgs").split("|").filter(Boolean);
+      img.removeAttribute("data-imgs");
+      fillImg(img, list, +img.getAttribute("data-w") || 120);
+    });
+  };
+  window.lazyImg = function(names, w, cls, alt){
+    return '<img class="' + (cls || "") + '" alt="' + (alt || "") + '" decoding="async" data-w="' + (w || 120) + '" data-imgs="' + names.replace(/"/g, "&quot;") + '">';
+  };
+})();
+</script>
+<style>
+:root{
+  --bg:#f5f3ee; --surface:#ffffff; --ink:#1d2a2e; --muted:#5d6b6f; --line:#e3ded3;
+  --brand:#1f6f68; --brand-2:#2c8c7f; --accent:#e07a3f; --sky:#d9ece9; --warm:#fbf1e6;
+  --stay-rust:#d0632f; --stay-bodensee:#2d6fa8; --stay-titisee:#2f8a4f; --stay-fra:#8a4fb0;
+  --shadow:0 10px 30px rgba(20,40,40,.10);
+  --radius:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11181a; --surface:#1a2427; --ink:#e9efee; --muted:#9fb0b1; --line:#2a3a3d;
+    --brand:#4fb3a6; --brand-2:#62c4b6; --accent:#f09a63; --sky:#1e3134; --warm:#2a2620;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11181a; --surface:#1a2427; --ink:#e9efee; --muted:#9fb0b1; --line:#2a3a3d;
+  --brand:#4fb3a6; --brand-2:#62c4b6; --accent:#f09a63; --sky:#1e3134; --warm:#2a2620;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* never allow sideways scrolling (iOS Safari ignores overflow-x on body alone; clip keeps the sticky bar working) */
+html,body{max-width:100%}
+@supports (overflow-x:clip){ html,body{overflow-x:clip} }
+@supports not (overflow-x:clip){ body{overflow-x:hidden} }
+main,section,header,footer,.day,.day-body,.grid>*,.timeline li,.what,.rest,.panel,.sos-card,.tipcard,.stay{min-width:0}
+.what,.rest p,.tip,.alt,.sos-note,.flt,.panel,footer{overflow-wrap:anywhere}
+img,svg,video,iframe{max-width:100%}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Rubik",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+img{display:block;max-width:100%}
+
+/* ---------- photos with fallback ---------- */
+.ph{position:relative;overflow:hidden;background:linear-gradient(135deg,#2c8c7f,#1f4f6f 60%,#14343f);}
+.ph img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease, transform 6s ease}
+.ph img.ok{opacity:1}
+.ph:hover img.ok{transform:scale(1.04)}
+.ph .ph-label{position:absolute;inset:auto 0 0 0;padding:28px 14px 10px;color:#fff;font-weight:500;font-size:.92rem;
+  background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.ph .ph-fallback{position:absolute;inset:0;display:none;place-items:center;color:#fff;font-size:2.6rem;opacity:.85}
+.ph.failed .ph-fallback{display:grid}
+.ph a.credit{position:absolute;top:8px;left:8px;font-size:.7rem;color:#fff;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:99px;text-decoration:none;opacity:0;transition:opacity .2s}
+.ph:hover a.credit,.ph:focus-within a.credit{opacity:1}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff}
+.hero .ph{position:absolute;inset:0}
+.hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 35%,rgba(8,25,28,.85) 100%)}
+.hero-inner{position:relative;z-index:2;width:100%;max-width:100%;max-width:1100px;margin:0 auto;padding:0 20px 56px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.kicker{display:inline-block;line-height:1.55;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:99px;font-size:.9rem;letter-spacing:.02em}
+.hero h1{font-size:clamp(2.1rem,6vw,4.4rem);line-height:1.05;margin:16px 0 10px;font-weight:800;text-shadow:0 4px 30px rgba(0,0,0,.35)}
+.hero h1 .sub{display:block;font-size:.5em;font-weight:500;margin-top:8px;opacity:.95}
+.hero p.lead{font-size:clamp(1.05rem,2.2vw,1.35rem);max-width:640px;margin:0 0 22px;opacity:.95}
+.hero-stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.stat{background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 16px;min-width:120px}
+.stat b{display:block;font-size:1.5rem;line-height:1.1}
+.stat span{font-size:.85rem;opacity:.9}
+.hero-weather{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:12px 16px;max-width:620px}
+.hero-weather .big{font-size:2.2rem;line-height:1}
+.hero-weather b{font-size:1.4rem}
+.hero-weather small{display:block;opacity:.85;font-size:.82rem}
+
+/* ---------- sticky day nav with scroll-spy ---------- */
+nav.days{position:sticky;top:0;z-index:1100;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);transition:box-shadow .2s}
+nav.days.stuck{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+nav.days .wrap{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth}
+nav.days .wrap::-webkit-scrollbar{display:none}
+nav.days a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:6px 14px;border-radius:99px;font-size:.88rem;font-weight:500;white-space:nowrap;transition:background .2s,color .2s,border-color .2s,transform .2s}
+nav.days a small{opacity:.7;font-weight:400}
+nav.days a:hover{border-color:var(--brand);color:var(--brand)}
+nav.days a.active{background:var(--brand);border-color:var(--brand);color:#fff;transform:translateY(-1px)}
+nav.days a.active small{opacity:.9}
+
+main{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+section{margin-top:64px;scroll-margin-top:70px}
+h2.sec{font-size:clamp(1.6rem,3.5vw,2.2rem);margin:0 0 6px}
+p.sec-sub{color:var(--muted);margin:0 0 24px}
+
+/* ---------- overview ---------- */
+.route{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stay{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border-top:6px solid var(--c)}
+.stay .ph{height:170px}
+.stay .body{padding:16px 18px 18px}
+.stay h3{margin:0 0 2px;font-size:1.15rem}
+.stay .nights{color:var(--c);font-weight:700;font-size:.9rem}
+.stay p{margin:6px 0 0;color:var(--muted);font-size:.93rem}
+.stay.rust{--c:var(--stay-rust)} .stay.bodensee{--c:var(--stay-bodensee)} .stay.titisee{--c:var(--stay-titisee)} .stay.fra{--c:var(--stay-fra)}
+
+
+/* ---------- weather strip ---------- */
+.wx-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:22px}
+.wx{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:12px 8px;text-align:center;text-decoration:none;color:var(--ink)}
+.wx .d{font-size:.78rem;color:var(--muted)}
+.wx .i{font-size:1.6rem;line-height:1.4}
+.wx .t{font-weight:700}
+.wx .t span{color:var(--muted);font-weight:400}
+.wx .p{font-size:.74rem;color:var(--muted)}
+
+/* ---------- day cards ---------- */
+.day{background:var(--surface);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;margin-top:34px;scroll-margin-top:70px}
+.day-head{position:relative;height:clamp(240px,40vw,380px)}
+.day-head .ph{position:absolute;inset:0}
+.day-head .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(5,20,24,.82))}
+.day-head .ph .ph-label{display:none}
+.day-title{position:absolute;z-index:2;inset:auto 0 0 0;padding:22px 24px;color:#fff}
+.day-num{display:inline-flex;align-items:center;gap:8px;font-weight:700;background:var(--accent);color:#fff;padding:4px 12px;border-radius:99px;font-size:.92rem}
+.day-title h3{margin:8px 0 0;font-size:clamp(1.4rem,3.6vw,2.1rem);line-height:1.2;text-shadow:0 2px 16px rgba(0,0,0,.4)}
+.day-body{padding:22px 24px 26px}
+
+/* day summary */
+.daysum{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 0;margin:0 0 14px;padding:7px 6px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.daysum .it{display:inline-flex;align-items:center;gap:4px;padding:0 10px;white-space:nowrap;border-inline-end:1px solid var(--line)}
+.daysum .it:last-of-type{border-inline-end:none}
+.daysum .it b{color:var(--ink);font-weight:600}
+.daysum .tot{margin-inline-start:6px;background:var(--brand);color:#fff;border-radius:999px;padding:3px 12px;font-weight:700;white-space:nowrap}
+.daysum .tot small{font-weight:400;opacity:.8;margin-inline-start:4px}
+.wx-badge{position:absolute;z-index:3;top:14px;left:14px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:14px;color:#fff;
+  background:rgba(10,25,30,.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);font-variant-numeric:tabular-nums;line-height:1.15}
+.wx-badge .i{font-size:1.5rem}
+.wx-badge b{display:block;font-size:.98rem}
+.wx-badge small{display:block;font-size:.68rem;opacity:.85}
+.wx-badge .sun{display:block;margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.22);font-size:.7rem;opacity:.95;white-space:nowrap}
+.wx-badge .sun em{font-style:normal;color:#ffd98a}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.86rem;padding:5px 12px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.chip.stay-rust{background:color-mix(in srgb,var(--stay-rust) 14%,var(--surface));border-color:color-mix(in srgb,var(--stay-rust) 40%,transparent)}
+.chip.stay-bodensee{background:color-mix(in srgb,var(--stay-bodensee) 14%,var(--surface));border-color:color-mix(in srgb,var(--stay-bodensee) 40%,transparent)}
+.chip.stay-titisee{background:color-mix(in srgb,var(--stay-titisee) 14%,var(--surface));border-color:color-mix(in srgb,var(--stay-titisee) 40%,transparent)}
+.chip.stay-fra{background:color-mix(in srgb,var(--stay-fra) 14%,var(--surface));border-color:color-mix(in srgb,var(--stay-fra) 40%,transparent)}
+.chip.depart{background:var(--accent);color:#fff;border-color:transparent;font-weight:700}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:26px;align-items:start}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;top:8px;bottom:8px;right:67px;width:2px;background:var(--line)}
+.timeline li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:32px;padding:8px 0;position:relative}
+.timeline time{font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;font-size:.95rem;text-align:left;padding-top:1px}
+.timeline li::after{content:"";position:absolute;right:62px;top:15px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--brand)}
+.timeline li.drive::after{border-color:var(--muted);background:var(--muted)}
+.timeline li.key::after{border-color:var(--accent);background:var(--accent)}
+.timeline li.food::after{border-color:#c9a227;background:#c9a227}
+.timeline li.drive .what{color:var(--muted);font-size:.93rem}
+.what b{display:block}
+.what small{display:block;color:var(--muted);font-size:.88rem}
+.what a.nav{font-size:.8rem;text-decoration:none;white-space:nowrap}
+
+.gallery{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.gallery .ph{border-radius:14px;aspect-ratio:4/3}
+.gallery .ph.wide{grid-column:1/-1;aspect-ratio:16/9}
+.tip{margin-top:14px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:14px;padding:12px 14px;font-size:.92rem}
+.tip b{color:var(--accent)}
+.alt{margin-top:12px;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:.92rem;color:var(--muted)}
+
+/* stroller badges */
+.pram{display:inline-block;font-size:.72rem;font-weight:500;padding:1px 8px;border-radius:99px;margin-inline-start:6px;vertical-align:2px;white-space:nowrap}
+.pram.ok{background:color-mix(in srgb,#2f8a4f 16%,transparent);color:#24753f}
+.pram.part{background:color-mix(in srgb,#d9a21b 20%,transparent);color:#8a6400}
+.pram.no{background:color-mix(in srgb,#c2412d 15%,transparent);color:#a3301f}
+:root[data-theme="dark"] .pram.ok{color:#7fd39a} :root[data-theme="dark"] .pram.part{color:#f0c75a} :root[data-theme="dark"] .pram.no{color:#f19584}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pram.ok{color:#7fd39a} :root:not([data-theme="light"]) .pram.part{color:#f0c75a} :root:not([data-theme="light"]) .pram.no{color:#f19584}}
+.what small.pn{color:var(--muted);font-size:.8rem}
+
+/* map */
+.map-card{position:relative;z-index:0;isolation:isolate;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:22px}
+#tripMap{height:380px;width:100%;background:var(--sky)}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;padding:10px 14px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+.map-legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-hotel{width:22px;height:22px;border-radius:7px;display:inline-grid;place-items:center;font-size:12px;color:#fff;background:#2d6fa8;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.lg-attr{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-sizing:border-box}
+.lg-route{width:26px;border-top:3px dashed #1f6f68}
+.mk-hotel{position:relative;overflow:hidden;width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-size:19px;color:#fff;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);transform:rotate(0)}
+.mk-attr{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:#fff;border:3px solid #e07a3f;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.mk-air{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:#1d2a2e;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.leaflet-popup-content{direction:rtl;text-align:right;font-family:"Rubik",system-ui,sans-serif;font-size:.9rem;line-height:1.5;margin:10px 14px}
+.leaflet-popup-content b{display:block;font-size:.98rem}
+.leaflet-popup-content .pd{color:#5d6b6f;font-size:.8rem}
+.leaflet-tooltip.mk-tip{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:99px;direction:rtl}
+.map-fallback{display:grid;place-items:center;height:100%;color:var(--muted);font-size:.95rem;padding:20px;text-align:center}
+@media (max-width:480px){ #tripMap{height:320px} }
+
+/* car thumbnails */
+.car-thumb{width:46px;height:30px;object-fit:cover;border-radius:7px;vertical-align:middle;border:2px solid rgba(255,255,255,.7);background:#cfd8da;margin-inline-start:6px}
+.car-thumb.lg{width:74px;height:46px;display:block;margin:0 auto 4px}
+.car-thumb.sm{width:34px;height:22px;border-width:1px;border-radius:5px}
+.car-thumb.img-failed{display:none}
+.mk-attr{position:relative;overflow:hidden}
+.mk-attr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mk-attr img.img-failed{display:none}
+.mk-hotel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mk-hotel img.img-failed{display:none}
+.pop-img{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:6px;display:block}
+.pop-img.img-failed{display:none}
+
+a.waze{color:#05a5d6}
+/* menu popup */
+.menu-btn{font:inherit;font-size:.75rem;font-weight:500;margin-inline-start:6px;padding:2px 10px;border-radius:99px;border:1px solid color-mix(in srgb,#c9a227 50%,transparent);
+  background:color-mix(in srgb,#c9a227 16%,var(--surface));color:var(--ink);cursor:pointer;vertical-align:2px}
+.menu-btn:hover{background:color-mix(in srgb,#c9a227 30%,var(--surface))}
+dialog.menu-dlg{border:none;padding:0;border-radius:18px;max-width:min(420px,calc(100vw - 32px));width:100%;background:transparent;color:var(--ink)}
+dialog.menu-dlg::backdrop{background:rgba(10,20,22,.55);backdrop-filter:blur(2px)}
+dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shadow:0 20px 60px rgba(0,0,0,.35);background:var(--warm)}
+.dlg-x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--ink);font-size:.95rem;cursor:pointer}
+.dlg-x:hover{background:rgba(0,0,0,.16)}
+
+.open-tbl th{font-size:.82rem;color:var(--muted);font-weight:500}
+.open-tbl td:nth-child(2){white-space:nowrap;color:var(--muted);font-size:.86rem}
+/* emergency */
+.sos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sos-card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;border-top:5px solid #c2412d;scroll-margin-top:110px}
+.sos-card h3{margin:0;font-size:1.05rem}
+.sos-sub{margin:2px 0 10px;color:var(--muted);font-size:.82rem}
+.sos-list{display:flex;flex-direction:column;gap:6px}
+a.tel{display:flex;justify-content:space-between;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.88rem}
+a.tel b{direction:ltr;unicode-bidi:isolate;white-space:nowrap;color:#c2412d;font-size:.95rem}
+a.tel:hover{border-color:#c2412d}
+.sos-note{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.chip.sos{background:color-mix(in srgb,#c2412d 12%,var(--surface));border-color:color-mix(in srgb,#c2412d 35%,transparent);text-decoration:none;color:var(--ink)}
+@media (max-width:860px){ .sos-grid{grid-template-columns:1fr} }
+/* flights */
+.flights{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 16px;max-width:640px}
+.flt{flex:1 1 240px;min-width:0;max-width:100%;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:10px 14px;text-align:right}
+.flt-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.flt-no{font-weight:800;font-size:1.05rem;letter-spacing:.02em}
+.flt-st{font-size:.74rem;padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.18);white-space:nowrap}
+.flt-st.ok{background:#2f8a4f}.flt-st.warn{background:#d9a21b;color:#1d2a2e}.flt-st.bad{background:#c2412d}
+.flt-route{font-size:.95rem;margin-top:4px}
+.flt-route .arr{opacity:.7;margin:0 4px}
+.flt small{display:block;opacity:.85;font-size:.76rem}
+.flt-links{flex-basis:100%;font-size:.76rem;opacity:.9}
+.flt-links a{color:#fff}
+/* tools: parking + fuel */
+dialog.tool-dlg{border:none;padding:0;border-radius:18px;max-width:min(440px,calc(100vw - 32px));width:100%;background:transparent;color:var(--ink)}
+dialog.tool-dlg::backdrop{background:rgba(10,20,22,.55);backdrop-filter:blur(2px)}
+.tool-box{position:relative;background:var(--surface);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.tool-box h3{margin:0 0 10px;font-size:1.15rem}
+.tool-box p{margin:0 0 10px;color:var(--muted);font-size:.92rem}
+.tool-btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tool-btns .act-btn{text-decoration:none;box-shadow:none}
+.act-btn.waze-btn{color:#05a5d6}
+.act-btn.is-off{opacity:.45;pointer-events:none}
+.tool-note{font-size:.8rem;color:var(--muted);margin:6px 0 0;line-height:1.6}
+.park-info{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.92rem}
+.park-info b{color:var(--brand)}
+.park-note{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted);margin-top:10px}
+.park-note input{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+/* webcams */
+.cams{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cam{display:block;text-decoration:none;color:var(--ink);background:var(--surface);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.cam-img{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#2c8c7f,#1f4f6f)}
+.cam-img img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-live{position:absolute;top:8px;left:8px;font-size:.66rem;font-weight:700;color:#fff;background:#c2412d;padding:1px 7px;border-radius:99px}
+.cam-off{position:absolute;inset:0;display:none;place-items:center;color:#fff;font-size:.8rem}
+.cam.off .cam-off{display:grid}.cam.off img,.cam.off .cam-live{display:none}
+.cam-cap{padding:8px 10px}
+.cam-cap b{display:block;font-size:.88rem}
+.cam-cap small{color:var(--muted);font-size:.74rem}
+@media (max-width:860px){ .cams{grid-template-columns:repeat(2,minmax(0,1fr))} }
+/* compact tools toolbar */
+.tools-bar{display:inline-flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.tool{font:inherit;display:flex;align-items:center;gap:6px;padding:7px 14px;border:none;background:none;color:var(--ink);cursor:pointer;font-size:.82rem;font-weight:500;white-space:nowrap}
+.tool+.tool{border-inline-start:1px solid var(--line)}
+.tool .ic{font-size:1rem;line-height:1}
+.tool:hover{background:color-mix(in srgb,var(--brand) 9%,transparent);color:var(--brand)}
+.tool[disabled]{opacity:.6;cursor:wait}
+@media (max-width:480px){
+  .tools-bar{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:360px}
+  .tool{flex-direction:column;gap:2px;padding:7px 4px;font-size:.72rem}
+  .tool .ic{font-size:1.05rem}
+}
+/* back to top */
+.to-top{position:fixed;left:16px;bottom:18px;z-index:1100;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+  background:var(--brand);color:#fff;font-size:1.35rem;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.25);
+  opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .25s,transform .25s}
+.to-top.show{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{background:var(--brand-2)}
+
+.kicker b{font-weight:800}
+/* ticker */
+.ticker{direction:ltr;overflow:hidden;contain:paint;max-width:100%;border-top:1px solid var(--line);background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-size:.88rem;white-space:nowrap}
+.ticker .track{display:flex;width:max-content;animation:tick 45s linear infinite}
+.ticker:hover .track{animation-play-state:paused}
+.ticker .item{direction:rtl;display:inline-flex;align-items:center;gap:6px;padding:7px 26px;border-inline-end:1px solid rgba(255,255,255,.25)}
+.ticker .item b{font-variant-numeric:tabular-nums}
+.ticker .live{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7CFFB2;box-shadow:0 0 0 0 rgba(124,255,178,.7);animation:pulse 2s infinite}
+@keyframes tick{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(124,255,178,.6)}70%{box-shadow:0 0 0 7px rgba(124,255,178,0)}100%{box-shadow:0 0 0 0 rgba(124,255,178,0)}}
+@media (prefers-reduced-motion: reduce){.ticker .track{animation:none;flex-wrap:wrap;width:auto;justify-content:center}}
+.live-note{font-size:.78rem;color:var(--muted);margin-top:8px}
+.wx .fc{display:inline-block;font-size:.66rem;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;margin-top:2px}
+
+/* restaurant + shop cards */
+.rest{margin-top:14px;background:var(--warm);border-radius:16px;padding:14px 16px;border:1px solid color-mix(in srgb,#c9a227 30%,transparent)}
+.rest .tag{display:inline-block;font-size:.74rem;font-weight:700;color:#8a6d0b;background:color-mix(in srgb,#c9a227 22%,transparent);padding:2px 10px;border-radius:99px}
+:root[data-theme="dark"] .rest .tag{color:#e7c75a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rest .tag{color:#e7c75a}}
+.rest h4{margin:6px 0 2px;font-size:1.05rem}
+.rest p{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
+.menu{width:100%;border-collapse:collapse;font-size:.88rem}
+.menu td{padding:5px 0;border-top:1px dashed color-mix(in srgb,var(--muted) 35%,transparent);vertical-align:top}
+.menu td.pr{text-align:left;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums;padding-inline-start:10px}
+.menu td i{display:block;font-style:normal;color:var(--muted);font-size:.78rem;direction:ltr;text-align:right}
+.rest .note{font-size:.75rem;color:var(--muted);margin-top:6px}
+.shop{border-color:color-mix(in srgb,var(--stay-titisee) 35%,transparent);background:color-mix(in srgb,var(--stay-titisee) 9%,var(--surface))}
+.shop .tag{color:var(--stay-titisee);background:color-mix(in srgb,var(--stay-titisee) 16%,transparent)}
+
+/* ---------- costs ---------- */
+.pt-list{display:grid;gap:8px}
+.pt-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.pt-row .nm{font-weight:600;font-size:.92rem;min-width:0;overflow-wrap:anywhere}
+.pt-row .nm small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.pt-row .now{font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:left}
+.pt-row .now small{display:block;font-weight:500;font-size:.74rem;text-align:left}
+.pt-row .up{color:#c0392b}.pt-row .down{color:#1e8449}.pt-row .same{color:var(--muted)}
+.pt-row svg{display:block;width:84px;height:28px}
+.pt-row a{font-size:.78rem;color:var(--brand);text-decoration:none;white-space:nowrap}
+@media (max-width:480px){.pt-row{grid-template-columns:minmax(0,1fr) auto}.pt-row .nm{grid-column:1/-1}.pt-row svg{width:100%;max-width:140px}}
+@media print{#prices{display:none}}
+
+.cost-wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+.panel h3{margin:0 0 12px;font-size:1.1rem}
+table.costs{width:100%;border-collapse:collapse;font-size:.95rem}
+table.costs th,table.costs td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:right}
+table.costs td.n,table.costs th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.costs tr.group td{font-weight:700;color:var(--brand);background:color-mix(in srgb,var(--brand) 7%,transparent);border-bottom:none;font-size:.85rem}
+table.costs tr.sub td{color:var(--muted);font-size:.88rem;padding-inline-start:18px}
+table.costs tr.grand td{font-weight:800;font-size:1.15rem;border-bottom:none;border-top:3px solid var(--brand)}
+table.costs small{color:var(--muted);font-weight:400}
+.inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inputs label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.inputs select{font:inherit;font-size:.95rem;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.inputs input{font:inherit;font-size:1rem;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.big-total{margin-top:16px;background:var(--brand);color:#fff;border-radius:16px;padding:16px 18px}
+.big-total b{display:block;font-size:2rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.big-total span{opacity:.9;font-size:.88rem}
+.assume{font-size:.8rem;color:var(--muted);margin-top:12px}
+.assume ul{margin:6px 0 0;padding-inline-start:18px}
+
+/* ---------- tips ---------- */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tipcard{background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.tipcard .ico{font-size:1.6rem}
+.tipcard h3{margin:6px 0 4px;font-size:1.05rem}
+.tipcard p{margin:0;color:var(--muted);font-size:.93rem}
+
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 16px 50px;border-top:1px solid var(--line)}
+footer a{color:var(--muted)}
+
+
+@media (max-width:860px){
+  .grid,.cost-wrap{grid-template-columns:minmax(0,1fr)}
+  .route{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tips{grid-template-columns:1fr}
+  .wx-strip{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:480px){
+  .hero{min-height:auto;padding-top:28px}
+  .hero-inner{padding:0 14px 28px}
+  .hero h1{font-size:1.85rem;margin:12px 0 6px}
+  .hero p.lead{font-size:.95rem;margin-bottom:14px}
+  .hero-weather{gap:4px 14px;padding:10px 12px;margin-bottom:12px;width:100%}
+  .hero-weather .big{font-size:1.6rem}
+  .hero-weather b{font-size:1.05rem}
+  .hero-weather small{font-size:.72rem}
+  .flights{gap:8px;width:100%}
+  .flt{flex-basis:100%;padding:8px 12px}
+  .flt-st{font-size:.68rem;white-space:normal;text-align:center}
+  .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .stat{min-width:0;padding:8px 10px}
+  .hero-stats .stat:last-child{grid-column:1/-1}
+  .stat b{font-size:1.15rem}
+  .car-thumb.lg{width:56px;height:34px}
+  .actions{gap:8px}
+  .act-btn{font-size:.85rem;padding:8px 12px}
+  .day-body{padding:18px 16px 22px}
+  .day-title{padding:18px 16px}
+  .hero-inner{padding-bottom:40px}
+  .daysum{border-radius:16px}
+  .daysum .tot{margin-inline-start:0}
+  .wx-strip{grid-template-columns:repeat(3,1fr)}
+  .panel{padding:16px}
+}
+/* share / pdf bar */
+.actions{display:flex;justify-content:center;gap:10px;padding:12px 16px 0;max-width:1100px;margin:0 auto}
+.act-btn{font:inherit;font-size:.9rem;font-weight:500;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.act-btn:hover{border-color:var(--brand);color:var(--brand)}
+.act-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.act-btn.primary:hover{background:var(--brand-2);color:#fff}
+.act-btn[disabled]{opacity:.6;cursor:wait}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:1200;background:#1d2a2e;color:#fff;padding:10px 18px;border-radius:999px;font-size:.9rem;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.print-only{display:none}
+
+@media print{
+  .flights{color:#1d2a2e}.flt{border-color:#ccc}.flt-links{display:none}
+  @page{size:A4;margin:11mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  :root{--bg:#fff;--surface:#fff;--ink:#1d2a2e;--muted:#5d6b6f;--line:#ddd;--shadow:none}
+  html{scroll-behavior:auto}
+  body{background:#fff;font-size:11pt}
+  nav.days,.actions,.to-top,#cams,dialog.tool-dlg,.toast,.menu-btn,.map-card,.gallery,.ph a.credit,#open .sec-sub,.inputs,.live-note,a.waze,.chip.sos,#overview > .sec-sub{display:none !important}
+  .print-only{display:block}
+  .hero{min-height:0;height:62mm;margin-bottom:6mm;border-radius:0}
+  .hero-inner{padding-bottom:6mm}
+  .hero h1{font-size:24pt;margin:6px 0}
+  .hero p.lead,.hero-stats{display:none}
+  .hero-weather{margin:0}
+  main{padding:0}
+  section{margin-top:8mm}
+  .route{grid-template-columns:repeat(4,1fr);gap:8px}
+  .stay .ph{height:28mm}
+  .day{box-shadow:none;border:1px solid #ccc;border-radius:12px;margin-top:0;break-inside:auto;break-before:page}
+  #open,#costs,#sos{break-before:page}
+  .day-head{height:38mm;break-after:avoid}
+  .day-title{padding:8px 14px}
+  .day-title h3{font-size:15pt}
+  .day-body{padding:10px 14px}
+  .grid{grid-template-columns:1fr;gap:6px}
+  .timeline li{break-inside:avoid;padding:4px 0}
+  .tip,.alt,.rest{break-inside:avoid}
+  .daysum{border-radius:12px}
+  a{color:inherit;text-decoration:none}
+  .sos-grid,.tips{grid-template-columns:repeat(2,1fr)}
+  .sos-card,.tipcard,.panel{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  .cost-wrap{grid-template-columns:1fr}
+  dialog.menu-dlg{display:block;position:static;max-width:none;width:auto;margin:0 0 5mm;padding:0;background:none;break-inside:avoid}
+  dialog.menu-dlg .rest{box-shadow:none}
+  .dlg-x{display:none}
+  .menus-title{margin:8mm 0 4mm;font-size:16pt;break-before:page}
+}
+
+/* ---------- black forest additions ---------- */
+img.img-failed{display:none}
+.pop-img:not([src]){display:none}
+@media (max-width:480px){ .route{grid-template-columns:1fr} }
+/* red card tag in the timeline */
+.card-tag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:99px;margin-inline-start:6px;vertical-align:2px;white-space:nowrap}
+.card-tag.inc{background:#c2412d;color:#fff}
+.card-tag.chk{background:color-mix(in srgb,#d9a21b 22%,transparent);color:#8a6400}
+.card-tag.pay{background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--ink)}
+:root[data-theme="dark"] .card-tag.chk{color:#f0c75a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .card-tag.chk{color:#f0c75a}}
+.chip.redcard{background:#c2412d;color:#fff;border-color:transparent;font-weight:700;text-decoration:none}
+/* options box inside a day */
+.opts{margin-top:12px;border:1px solid color-mix(in srgb,#c2412d 30%,transparent);background:color-mix(in srgb,#c2412d 6%,var(--surface));border-radius:14px;padding:12px 14px;font-size:.9rem}
+.opts b.h{display:block;color:#c2412d;margin-bottom:4px}
+.opts ul{margin:0;padding-inline-start:18px}
+.opts li{margin:3px 0}
+/* card catalog */
+.redcard-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#c2412d,#8f2a1c);color:#fff;border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+.redcard-head .rc{width:74px;height:48px;border-radius:8px;background:linear-gradient(135deg,#e2553e,#a02f1f);border:2px solid rgba(255,255,255,.6);display:grid;place-items:center;font-weight:800;font-size:.7rem;line-height:1.1;text-align:center;flex:0 0 auto}
+.redcard-head p{margin:0;font-size:.92rem;opacity:.95;flex:1 1 260px}
+.redcard-head a{color:#fff}
+.cat-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.cat-filters button{font:inherit;font-size:.85rem;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.cat-filters button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.cat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cat{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.cat .ph{height:130px}
+.cat .cb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
+.cat h3{margin:0;font-size:1rem}
+.cat .st{align-self:flex-start;font-size:.74rem;font-weight:700;padding:2px 10px;border-radius:99px}
+.cat .st.inc{background:#c2412d;color:#fff}
+.cat .st.chk{background:color-mix(in srgb,#d9a21b 22%,transparent);color:#8a6400}
+.cat .st.pay{background:color-mix(in srgb,var(--muted) 18%,transparent)}
+:root[data-theme="dark"] .cat .st.chk{color:#f0c75a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cat .st.chk{color:#f0c75a}}
+.cat p{margin:0;color:var(--muted);font-size:.86rem}
+.cat .meta2{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:auto;padding-top:6px}
+.cat .meta2 a{text-decoration:none}
+.cat-empty{color:var(--muted);text-align:center;padding:20px}
+@media (max-width:860px){ .cat-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:480px){ .cat-grid{grid-template-columns:1fr} }
+/* webcam link cards */
+.cam-img .cam-emoji{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4rem}
+.cam-img .cam-go{position:absolute;bottom:8px;left:8px;font-size:.7rem;color:#fff;background:rgba(0,0,0,.4);padding:1px 8px;border-radius:99px}
+@media print{ .cat-filters{display:none !important} .cat{box-shadow:none;border:1px solid #ddd;break-inside:avoid} .cat .ph{display:none} #catalog{break-before:page} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="ph" data-img="wiki:Titisee|wiki:de:Titisee|wiki:Black Forest" data-fallback="🌲"></div>
+  <div class="hero-inner">
+    <span class="kicker">🇩🇪🇫🇷🇨🇭 ראשון 15.8 – ראשון 29.8 · <b>היער השחור</b><br><b>אלזס, אגם קונסטנץ ופרנקפורט</b></span>
+    <h1>הטיול שלנו ליער השחור<br><span class="sub">היידלברג · אלזס · אגם קונסטנץ · טיטיזה</span></h1>
+    <p class="lead">רכבלים לפסגות, מגלשות הרים ארוכות, מפלים, עיירות צבעוניות באלזס, פארק אירופה ורולנטיקה, אי הפרחים ומפלי הריין. שבוע שלם עם הכרטיס האדום.</p>
+    <div class="hero-weather" title="ממוצע היסטורי לאמצע אוגוסט">
+      <span class="big">☀️</span>
+      <div><b><bdi dir="ltr">27° / 15°</bdi></b><small>ממוצע היסטורי לאוגוסט · עמק הריין (רוסט)</small></div>
+      <div><b><bdi dir="ltr">22° / 10°</bdi></b><small>טיטיזה (850 מ׳)</small></div>
+      <div><b><bdi dir="ltr">15° / 8°</bdi></b><small>בפסגת הפלדברג (1,493 מ׳)</small></div>
+    </div>
+    <div class="flights">
+      <div class="flt" id="flt-out">
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ הלוך</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route"><b><bdi dir="ltr" data-t1>--:--</bdi></b> תל אביב <span class="arr">←</span> פרנקפורט <b><bdi dir="ltr" data-t2>--:--</bdi></b></div>
+        <small>הלוך · ראשון 15.8 · נמל התעופה פרנקפורט (FRA)</small>
+      </div>
+      <div class="flt" id="flt-back">
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ חזור</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route"><b><bdi dir="ltr" data-t1>--:--</bdi></b> פרנקפורט <span class="arr">←</span> תל אביב <b><bdi dir="ltr" data-t2>--:--</bdi></b></div>
+        <small>חזור · ראשון 29.8 · נמל התעופה פרנקפורט (FRA)</small>
+      </div>
+      <div class="flt-links"><a target="_blank" rel="noopener" href="https://www.iaa.gov.il/airports/ben-gurion/flight-board/">לוח הטיסות של נתב״ג ↗</a> · <a target="_blank" rel="noopener" href="https://www.frankfurt-airport.com/en/flights-and-transfer/arrivals.html">לוח ההגעות בפרנקפורט ↗</a></div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>15</b><span>ימים</span></div>
+      <div class="stat"><b>4</b><span>מלונות</span></div>
+      <div class="stat"><b>3</b><span>מדינות</span></div>
+      <div class="stat"><b id="statKm">~1,850</b><span>ק״מ נסיעה</span></div>
+      <div class="stat"><b id="statTotal">—</b><span>עלות כוללת משוערת</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="days" id="daynav" aria-label="ניווט בין הימים">
+  <div class="wrap">
+    <a href="#overview">סקירה</a>
+    <a href="#day1">א׳ <small>15.8</small></a>
+    <a href="#day2">ב׳ <small>16.8</small></a>
+    <a href="#day3">ג׳ <small>17.8</small></a>
+    <a href="#day4">ד׳ <small>18.8</small></a>
+    <a href="#day5">ה׳ <small>19.8</small></a>
+    <a href="#day6">ו׳ <small>20.8</small></a>
+    <a href="#day7">שבת <small>21.8</small></a>
+    <a href="#day8">א׳ <small>22.8</small></a>
+    <a href="#day9">ב׳ <small>23.8</small></a>
+    <a href="#day10">ג׳ <small>24.8</small></a>
+    <a href="#day11">ד׳ <small>25.8</small></a>
+    <a href="#day12">ה׳ <small>26.8</small></a>
+    <a href="#day13">ו׳ <small>27.8</small></a>
+    <a href="#day14">שבת <small>28.8</small></a>
+    <a href="#day15">א׳ <small>29.8</small></a>
+    <a href="#catalog">🎟️ הכרטיס האדום</a>
+    <a href="#cams">📷 מצלמות</a>
+    <a href="#open">✅ פתוח?</a>
+    <a href="#costs">💰 עלויות</a>
+    <a href="#prices">📉 מחירים</a>
+    <a href="#sos">🚨 חירום</a>
+    <a href="#tips">טיפים</a>
+  </div>
+  <div class="ticker" aria-label="עדכונים חיים"><div class="track" id="tickerTrack"></div></div>
+</nav>
+
+<div class="actions" role="toolbar" aria-label="כלים">
+  <div class="tools-bar">
+    <button class="tool" id="shareBtn" type="button" title="שתף את המסלול"><span class="ic">📤</span><span class="lb">שיתוף</span></button>
+    <button class="tool" id="pdfBtn" type="button" title="שמור כ־PDF"><span class="ic">📄</span><span class="lb">PDF</span></button>
+    <button class="tool" id="parkBtn" type="button" title="איפה חנינו?"><span class="ic">🚗</span><span class="lb">חנייה</span></button>
+    <button class="tool" id="fuelBtn" type="button" title="תחנת דלק קרובה"><span class="ic">⛽</span><span class="lb">דלק</span></button>
+  </div>
+</div>
+
+<dialog class="tool-dlg" id="parkDlg" aria-label="איפה חנינו">
+  <div class="tool-box">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <h3>🚗 איפה חנינו?</h3>
+    <div id="parkInfo" class="park-info">עוד לא נשמר מיקום.</div>
+    <label class="park-note">הערה (לא חובה)<input id="parkNote" type="text" placeholder="למשל: P+R Rotonde, קומה 2, ליד היציאה לחשמלית"></label>
+    <div class="tool-btns">
+      <button class="act-btn primary" id="parkSave" type="button">📍 שמור את המיקום שלי עכשיו</button>
+      <a class="act-btn" id="parkGo" target="_blank" rel="noopener">🗺️ נווט לרכב (גוגל)</a>
+      <a class="act-btn waze-btn" id="parkWaze" target="_blank" rel="noopener">🚙 Waze</a>
+      <button class="act-btn" id="parkClear" type="button">🗑️ מחק</button>
+    </div>
+    <p class="tool-note">המיקום נשמר רק בטלפון הזה. צריך לאשר לאתר גישה למיקום. הניווט לרכב פותח מסלול הליכה.</p>
+  </div>
+</dialog>
+
+<dialog class="tool-dlg" id="fuelDlg" aria-label="תחנת דלק קרובה">
+  <div class="tool-box">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+    <h3>⛽ תחנת דלק קרובה</h3>
+    <p>יפתח מפה עם תחנות הדלק הקרובות אליכם: Tankstelle בגרמניה, Station-service בצרפת.</p>
+    <div class="tool-btns">
+      <a class="act-btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/Tankstelle/">🗺️ תחנות קרובות בגוגל מפות</a>
+      <a class="act-btn waze-btn" target="_blank" rel="noopener" href="https://waze.com/ul?q=Tankstelle&amp;navigate=no">🚙 תחנות קרובות ב־Waze</a>
+    </div>
+    <div class="tool-note">
+      <b>⚠️ לבדוק בחוזה של הרכב אם הוא בנזין או דיזל.</b> בנזין: Super / E10 / Super Plus (בצרפת SP95 / SP98). דיזל: Diesel (בצרפת Gazole), בדרך כלל עם ידית שחורה.
+      <br>💳 בגרמניה מתדלקים ומשלמים בקופה בפנים לפי מספר המשאבה (Säule). בצרפת הדלק בסופרמרקטים (Leclerc, Super U) זול יותר, אבל בחלק מהתחנות האוטומטיות צריך כרטיס אשראי עם PIN. על האוטובאן ובשוויץ הדלק יקר יותר.
+    </div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<main>
+
+<!-- ================= OVERVIEW ================= -->
+<section id="overview">
+  <h2 class="sec">המסלול במבט אחד</h2>
+  <p class="sec-sub">לחיצה על נקודה במפה פותחת את הפרטים שלה ואת הקישור ליום המתאים.</p>
+  <div class="map-card">
+    <div id="tripMap" dir="ltr" role="region" aria-label="מפת הטיול"></div>
+    <div class="map-legend">
+      <span><i class="lg-hotel">🛏</i> מלון (ריבוע)</span>
+      <span><i class="lg-attr"></i> אטרקציה במסלול (עיגול)</span>
+      <span><i class="lg-attr" style="border-color:#c2412d"></i> בכרטיס האדום</span>
+      <span><i class="lg-hotel" style="background:#1d2a2e;border-radius:50%">✈</i> שדה תעופה</span>
+      <span><i class="lg-route"></i> מסלול הנסיעה בין המלונות</span>
+    </div>
+  </div>
+  <p class="sec-sub">נוחתים בפרנקפורט, עוצרים בהיידלברג ונוסעים לאזור רוסט לארבעה לילות: שטרסבורג, פארק אירופה, קולמר ורולנטיקה. משם שני לילות בזינגן, ליד אגם קונסטנץ, ושבוע בטיטיזה עם הכרטיס האדום. את הלילה האחרון עושים ליד שדה התעופה בפרנקפורט.</p>
+
+  <div class="route">
+    <article class="stay rust">
+      <div class="ph" data-img="img/hotels/dimas.jpg|wiki:de:Ettenheim|wiki:Ettenheim|wiki:Europa-Park" data-fallback="🎢"></div>
+      <div class="body">
+        <span class="nights">לילות 1–4 · 15–19.8</span>
+        <h3>DiMas Hotel Ettenheim-Rust</h3>
+        <p>Gutenbergstraße, אטנהיים. כ־10–15 דק׳ מפארק אירופה ומרולנטיקה, וכ־45 דק׳ משטרסבורג ומקולמר.</p>
+      </div>
+    </article>
+    <article class="stay bodensee">
+      <div class="ph" data-img="img/hotels/holiday-inn-singen.jpg|wiki:de:Hohentwiel|wiki:Hohentwiel|wiki:Singen" data-fallback="🌷"></div>
+      <div class="body">
+        <span class="nights">לילות 5–6 · 19–21.8</span>
+        <h3>Holiday Inn Express Singen</h3>
+        <p>Am Schlossgarten 5, זינגן. כ־30 דק׳ לקונסטנץ ולאי מיינאו, וכ־25 דק׳ למפלי הריין.</p>
+      </div>
+    </article>
+    <article class="stay titisee">
+      <div class="ph" data-img="img/hotels/maritim-titisee.jpg|wiki:Titisee|wiki:de:Titisee" data-fallback="🌲"></div>
+      <div class="body">
+        <span class="nights">לילות 7–13 · 21–28.8</span>
+        <h3>Maritim TitiseeHotel</h3>
+        <p>על שפת אגם טיטיזה. מהלילה השני מקבלים את <b>הכרטיס האדום</b> (Hochschwarzwald Card) עם עשרות אטרקציות בחינם, ונסיעה חינם באוטובוסים וברכבות באזור.</p>
+      </div>
+    </article>
+    <article class="stay fra">
+      <div class="ph" data-img="img/hotels/zleep-frankfurt.jpg|wiki:Frankfurt Airport|wiki:Kelsterbach" data-fallback="✈️"></div>
+      <div class="body">
+        <span class="nights">לילה 14 · 28–29.8</span>
+        <h3>Zleep Hotel Frankfurt Airport</h3>
+        <p>Fuji-Allee, קלסטרבאך. כ־10 דק׳ נסיעה לטרמינלים, כדי שהבוקר של הטיסה יהיה רגוע.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ================= DAY 1 ================= -->
+<article class="day" id="day1">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Heidelberg Castle|wiki:Heidelberg|wiki:Karl Theodor Bridge" data-fallback="🏰"></div>
+    <div class="day-title">
+      <span class="day-num">יום ראשון · 15.8</span>
+      <h3>נחיתה בפרנקפורט ← היידלברג ← המלון ברוסט</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="1"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-rust">🚨 חירום באזור</a>
+      <span class="chip">🛬 נחיתה · פרנקפורט (FRA)</span>
+      <span class="chip stay-rust">🛏️ DiMas Hotel Ettenheim-Rust</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="key"><time>~10:00</time><div class="what"><b>נחיתה בשדה התעופה פרנקפורט (FRA)</b><small>ביקורת דרכונים ואיסוף מזוודות. השעות ביום הזה משוערות, ומתעדכנות לפי שעת הנחיתה</small></div></li>
+        <li><time>11:00</time><div class="what"><b>איסוף הרכב השכור</b><small>מרכז השכרת הרכב (Mietwagenzentrum) בטרמינל. לוודא שיש מושבי בטיחות ובוסטרים, וסט זוהר ומשולש, ולבדוק אם הרכב בנזין או דיזל</small></div></li>
+        <li class="drive"><time>11:30</time><div class="what">🚗 דרומה בכביש A5 להיידלברג (כ־90 ק״מ, כשעה)</div></li>
+        <li class="food"><time>12:45</time><div class="what"><b>🍽️ צהריים בעיר העתיקה ב־Vetter's Alt Heidelberger Brauhaus<button class="menu-btn" type="button" data-menu="menu-day1">📋 תפריט</button></b><small>Steingasse 9, ליד הגשר הישן · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Vetter%27s+Alt+Heidelberger+Brauhaus+Steingasse+9+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>🏰 טירת היידלברג ברכבל ההרים (Bergbahn)<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הרכבל נגיש. בחצר הטירה יש אבני מרצפת ומדרגות</small><small>עולים ברכבל ההרים מתחנת Kornmarkt לטירה (הכרטיס כולל את הרכבל, את חצר הטירה ואת החבית הענקית). מהמרפסת יש תצפית יפה על העיר ועל הנהר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Bergbahn+Kornmarkt+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>15:30</time><div class="what"><b>🌉 הגשר הישן (Alte Brücke) ורחוב Hauptstraße</b><small>מטיילים לאורך הנקר. ליד שער הגשר יש פסל קוף מברונזה שכולם מצטלמים איתו. גלידה לדרך</small></div></li>
+        <li class="drive"><time>16:30</time><div class="what">🚗 דרומה בכביש A5 לאטנהיים (כ־170 ק״מ, כשעה ו־40 דק׳)</div></li>
+        <li class="key"><time>18:15</time><div class="what"><b>צ׳ק־אין ב־DiMas Hotel Ettenheim-Rust</b><small>Gutenbergstraße, אטנהיים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=DiMas+Hotel+Ettenheim+Rust+Gutenbergstra%C3%9Fe+Ettenheim">🗺️ גוגל מפות</a></small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Heidelberg Castle|wiki:Heidelberg" data-label="טירת היידלברג" data-fallback="🏰"></div>
+          <div class="ph" data-img="wiki:Karl Theodor Bridge|wiki:de:Alte Brücke (Heidelberg)" data-label="הגשר הישן" data-fallback="🌉"></div>
+          <div class="ph" data-img="wiki:Heidelberg|wiki:de:Heidelberg" data-label="היידלברג" data-fallback="🏘️"></div>
+        </div>
+        <div class="tip"><b>⚠️ יום ראשון:</b> הסופרים בגרמניה סגורים, אבל המסעדות והאטרקציות פתוחות. קונים מים וחטיפים בשדה התעופה או בתחנת דלק. לסופר הולכים מחר בבוקר, ב־Lidl או ב־EDEKA באטנהיים. בהיידלברג חונים בחניון P12 Kornmarkt/Schloss, ליד תחנת הרכבל.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 2 ================= -->
+<article class="day" id="day2">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Petite France (Strasbourg)|wiki:Ponts Couverts|wiki:Strasbourg" data-fallback="⛪"></div>
+    <div class="day-title">
+      <span class="day-num">יום שני · 16.8</span>
+      <h3>שטרסבורג: הקתדרלה, פטיט פראנס ושייט בתעלות</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="2"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-fr">🚨 חירום בצרפת</a>
+      <span class="chip depart">⏰ יציאה 09:00</span>
+      <span class="chip stay-rust">🛏️ DiMas Hotel Ettenheim-Rust</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:00</time><div class="what">🚗 לחניון P+R Rotonde שבשטרסבורג (כ־50 ק״מ, כ־45 דק׳) וחשמלית A או D למרכז</div></li>
+        <li class="key"><time>10:00</time><div class="what"><b>⛪ קתדרלת נוטרדאם של שטרסבורג<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">הכניסה לקתדרלה שטוחה. לתצפית בגג (332 מדרגות) אין מעלית</small><small>הכניסה חינם. בשעה 12:30 מופעלות הדמויות בשעון האסטרונומי (צריך כרטיס למופע, וכדאי להגיע מוקדם) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Cath%C3%A9drale+Notre-Dame+de+Strasbourg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>11:00</time><div class="what"><b>⛴️ שייט בתעלות עם Batorama<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">מקפלים את העגלה על הסירה</small><small>סיבוב של כשעה ורבע סביב האי הגדול, דרך פטיט פראנס, הגשרים המקורים, הסכרים ורובע האיחוד האירופי. יש אוזניות עם הסבר. כדאי להזמין באתר מראש · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Batorama+Strasbourg+Rohan">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:45</time><div class="what"><b>🍕 צהריים: פלאמקוכן (טארט פלמבה) ב־Flam's<button class="menu-btn" type="button" data-menu="menu-day2">📋 תפריט</button></b><small>"פיצה אלזסית" דקה, שהילדים בדרך כלל אוהבים. ברשת יש גם גרסה עם גבינה בלבד ופלאמקוכן מתוק לקינוח · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Flam%27s+Strasbourg+rue+Merci%C3%A8re">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>🏘️ פטיט פראנס והגשרים המקורים (Ponts Couverts)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">שטוח, עם קצת אבני מרצפת</small><small>בתים עם קורות עץ על התעלות. מסכר ווֹבאן (Barrage Vauban) יש תצפית יפה מהגג, בחינם</small></div></li>
+        <li><time>15:30</time><div class="what"><b>🦩 פארק האורנז׳רי (Parc de l'Orangerie)</b><small>חסידות בקינים על העצים, מגרש משחקים גדול וסירות משוטים על האגם. בחשמלית או 25 דק׳ הליכה מהמרכז · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Parc+de+l%27Orangerie+Strasbourg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>17:00</time><div class="what">🚗 חזרה למלון (כ־45 דק׳). בדרך עוצרים בסופר באטנהיים</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Strasbourg Cathedral|wiki:Strasbourg" data-label="קתדרלת שטרסבורג" data-fallback="⛪"></div>
+          <div class="ph" data-img="wiki:Ponts Couverts|wiki:Petite France (Strasbourg)" data-label="הגשרים המקורים" data-fallback="🏘️"></div>
+          <div class="ph" data-img="wiki:Parc de l'Orangerie|wiki:fr:Parc de l'Orangerie" data-label="פארק האורנז׳רי" data-fallback="🦩"></div>
+        </div>
+        <div class="tip"><b>🚗 לא נכנסים עם הרכב לעיר:</b> בשטרסבורג יש אזור מוגבל לרכבים מזהמים (ZFE), ורכב שכור מגרמניה צריך מדבקת Crit'Air. הכי פשוט לחנות בחניון P+R (למשל Rotonde או Elsau). כרטיס החניה היומי כולל נסיעה בחשמלית הלוך וחזור לכל מי שברכב, בכמה יורו בלבד.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 3 ================= -->
+<article class="day" id="day3">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Europa-Park|wiki:Silver Star (roller coaster)|wiki:de:Europa-Park" data-fallback="🎢"></div>
+    <div class="day-title">
+      <span class="day-num">יום שלישי · 17.8</span>
+      <h3>יום שלם בפארק אירופה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="3"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-rust">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 08:30</span>
+      <span class="chip stay-rust">🛏️ DiMas Hotel Ettenheim-Rust</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>08:30</time><div class="what">🚗 לפארק אירופה ברוסט (כ־10 ק״מ, 15 דק׳)</div></li>
+        <li class="key"><time>09:00</time><div class="what"><b>🎢 פארק אירופה (Europa-Park)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">כל הפארק נגיש, ויש השכרת עגלות</small><small>מגיעים לפתיחה. 15 אזורים לפי מדינות באירופה, ורכבות הרים לכל גיל: Blue Fire ו־Silver Star לגדולים, ולקטנים "ארץ ההרפתקאות של ארתור" וקרוסלות באזור האירי והסקנדינבי · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Europa-Park+Rust">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:30</time><div class="what"><b>🍔 צהריים ב־FoodLoop, שבה האוכל מגיע לשולחן במסלול רכבת הרים<button class="menu-btn" type="button" data-menu="menu-day3">📋 תפריט</button></b><small>באזור הגרמני של הפארק. מזמינים במסך שעל השולחן. אפשר לאכול גם בעשרות מסעדות אחרות בפארק</small></div></li>
+        <li><time>13:30</time><div class="what"><b>🎡 ממשיכים בפארק</b><small>אחר הצהריים הולכים לאטרקציות המים (Atlantica SuperSplash, Poseidon) כשהכי חם, ובערב לקרוסלה ולגלגל הענק</small></div></li>
+        <li class="drive"><time>18:00</time><div class="what">🚗 חזרה למלון (15 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Silver Star (roller coaster)|wiki:Europa-Park" data-label="Silver Star" data-fallback="🎢"></div>
+          <div class="ph" data-img="wiki:Blue Fire (roller coaster)|wiki:de:Blue Fire Megacoaster" data-label="Blue Fire" data-fallback="🎢"></div>
+          <div class="ph" data-img="wiki:de:Europa-Park|wiki:Europa-Park" data-label="פארק אירופה" data-fallback="🎡"></div>
+        </div>
+        <div class="tip"><b>🎟️ להזמין מראש:</b> קונים כרטיסים מתוארכים באונליין. אמצע אוגוסט הוא עונת שיא, וגם בגרמניה וגם בצרפת עדיין יש חופש גדול. ילדים עד גיל 3 נכנסים בחינם, ומגיל 4 עד 11 משלמים מחיר ילד. באפליקציה של הפארק רואים את זמני ההמתנה בכל מתקן.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 4 ================= -->
+<article class="day" id="day4">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Colmar|wiki:fr:Petite Venise (Colmar)|wiki:Riquewihr" data-fallback="🏘️"></div>
+    <div class="day-title">
+      <span class="day-num">יום רביעי · 18.8</span>
+      <h3>קולמר · ריקוויר · הר הקופים</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="4"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-fr">🚨 חירום בצרפת</a>
+      <span class="chip depart">⏰ יציאה 09:00</span>
+      <span class="chip stay-rust">🛏️ DiMas Hotel Ettenheim-Rust</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:00</time><div class="what">🚗 לקולמר דרך הגשר על הריין במרקולסהיים (כ־55 ק״מ, כ־50 דק׳)</div></li>
+        <li class="key"><time>10:00</time><div class="what"><b>🛶 שייט בסירה שטוחה ב"ונציה הקטנה" (Petite Venise)<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">העגלה נשארת על הרציף</small><small>שייט של כחצי שעה על נהר הלוך, בין בתי העץ הצבעוניים. יוצאים ליד הגשר ב־Rue de Turenne · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Petite+Venise+Colmar">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>10:45</time><div class="what"><b>🏘️ העיר העתיקה של קולמר<span class="pram ok">👶 מתאים לעגלה</span></b><small>רובע הבורסקאים, השוק המקורה (Marché Couvert) ובית הפיפטרים. רכבת התיירים הקטנה עושה סיבוב של 35 דק׳ אם הרגליים מתעייפות</small></div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍽️ צהריים ב־Wistub Brenner<button class="menu-btn" type="button" data-menu="menu-day4">📋 תפריט</button></b><small>מסעדה אלזסית ותיקה על התעלה בונציה הקטנה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Wistub+Brenner+Colmar">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>13:30</time><div class="what">🚗 לריקוויר (כ־15 ק״מ, 20 דק׳) בדרך היין</div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>🍷 ריקוויר (Riquewihr)<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הרחוב הראשי עולה ומרוצף באבנים</small><small>כפר מימי הביניים בין הכרמים, שנראה כמו מתוך סרט של דיסני. יש בו חנות חג המולד שפתוחה כל השנה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Riquewihr">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>15:00</time><div class="what">🚗 לקינצהיים (כ־20 ק״מ, 25 דק׳)</div></li>
+        <li class="key"><time>15:30</time><div class="what"><b>🐒 הר הקופים (La Montagne des Singes)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">שביל עפר רחב ביער</small><small>כ־200 קופי ברברי מסתובבים חופשי ביער, ומאכילים אותם בפופקורן מיוחד שמקבלים בכניסה. ממש ליד יש גם את מופע העופות הדורסים Volerie des Aigles ואת טירת אוֹ־קניגסבורג · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=La+Montagne+des+Singes+Kintzheim">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>17:00</time><div class="what">🚗 חזרה למלון דרך סלסטה (כ־35 ק״מ, 40 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:fr:Petite Venise (Colmar)|wiki:Colmar" data-label="ונציה הקטנה, קולמר" data-fallback="🛶"></div>
+          <div class="ph" data-img="wiki:Riquewihr|wiki:fr:Riquewihr" data-label="ריקוויר" data-fallback="🍷"></div>
+          <div class="ph" data-img="wiki:Montagne des Singes|wiki:fr:Montagne des singes|wiki:Barbary macaque" data-label="הר הקופים" data-fallback="🐒"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> בקולמר כדאי לחנות בחניון Lacarre או Rapp, שניהם במרחק הליכה מונציה הקטנה. בהר הקופים לא נוגעים בקופים ומאכילים רק בפופקורן שמקבלים בכניסה. ביום חם מגיעים לשם אחרי 15:00, כשהקופים פעילים יותר.</div>
+        <div class="alt"><b>חלופה:</b> במקום ריקוויר אפשר לנסוע לקייזרסברג (Kaysersberg), שגם היא עיירה ציורית על דרך היין. ילדים שאוהבים טירות יאהבו את טירת Haut-Kœnigsbourg, שנמצאת 10 דק׳ מהר הקופים.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 5 ================= -->
+<article class="day" id="day5">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:de:Rulantica|wiki:Rulantica|wiki:Europa-Park" data-fallback="🌊"></div>
+    <div class="day-title">
+      <span class="day-num">יום חמישי · 19.8</span>
+      <h3>רולנטיקה ← נסיעה לזינגן</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="5"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-rust">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 09:00 (עם המזוודות)</span>
+      <span class="chip stay-bodensee">🛏️ Holiday Inn Express Singen</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li><time>08:30</time><div class="what"><b>צ׳ק־אאוט מהמלון</b><small>המזוודות נשארות באוטו. בתיק ליום: בגדי ים, מגבות, כפכפים ובגדים להחלפה</small></div></li>
+        <li class="drive"><time>09:00</time><div class="what">🚗 לרולנטיקה ברוסט (15 דק׳)</div></li>
+        <li class="key"><time>09:30</time><div class="what"><b>🌊 פארק המים רולנטיקה (Rulantica)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">יש עמדות לעגלות ליד הכניסה</small><small>פארק מים מקורה בעיצוב סקנדינבי, עם עשרות מגלשות, בריכת גלים, נהר עצל ואזור ילדים גדול (Trølldal). בקיץ פתוח גם האזור שבחוץ · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Rulantica+Rust">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:30</time><div class="what"><b>🍝 צהריים במסעדות של רולנטיקה</b><small>משלמים בצמיד שמקבלים בכניסה, ומסדירים את התשלום ביציאה</small></div></li>
+        <li class="drive"><time>16:00</time><div class="what">🚗 לזינגן דרך פרייבורג ועמק הגיהנום, בכביש B31 ו־A81 (כ־190 ק״מ, כשעתיים ורבע)</div></li>
+        <li class="key"><time>18:30</time><div class="what"><b>צ׳ק־אין ב־Holiday Inn Express Singen</b><small>Am Schlossgarten 5, Singen · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Holiday+Inn+Express+Singen+Am+Schlossgarten+5">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>19:00</time><div class="what"><b>🍕 ארוחת ערב קלה בזינגן</b><small>ליד המלון יש מרכז הקניות CANO, עם מסעדות ומזנונים</small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:de:Rulantica|wiki:Rulantica" data-label="רולנטיקה" data-fallback="🌊"></div>
+        </div>
+        <div class="tip"><b>🎟️ להזמין מראש!</b> בקיץ הכרטיסים לרולנטיקה נגמרים, ובקופה לא תמיד יש כרטיסים. המחיר תלוי ביום. ילדים עד גיל 3 נכנסים בחינם. מומלץ להגיע לפתיחה ולתפוס כיסאות נוח.</div>
+        <div class="alt"><b>מסלול חלופי:</b> אם רוצים פחות פארק מים, נשארים ברולנטיקה עד הצהריים ויוצאים מוקדם יותר. בדרך עוצרים בתחנה התחתונה של הרכבל בפרייבורג, או בעיירה טיטיזה.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 6 ================= -->
+<article class="day" id="day6">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Mainau|wiki:de:Mainau" data-fallback="🌷"></div>
+    <div class="day-title">
+      <span class="day-num">יום שישי · 20.8</span>
+      <h3>בית השוקולד של לינדט · אי הפרחים מיינאו</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="6"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-ch">🚨 חירום בשוויץ</a>
+      <a class="chip sos" href="#sos-bodensee">🚨 חירום באגם קונסטנץ</a>
+      <span class="chip depart">⏰ יציאה 08:45</span>
+      <span class="chip stay-bodensee">🛏️ Holiday Inn Express Singen</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>08:45</time><div class="what">🚗 לקילכברג שליד ציריך, דרך שפהאוזן (כ־85 ק״מ, כשעה ורבע). ⚠️ צריך ויניטה שוויצרית לכבישים המהירים</div></li>
+        <li class="key"><time>10:00</time><div class="what"><b>🍫 בית השוקולד של לינדט (Lindt Home of Chocolate)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">כל המוזיאון נגיש</small><small>מזרקת שוקולד בגובה 9 מ׳, סיור אינטראקטיבי על ההיסטוריה של השוקולד, טעימות חופשיות בסוף, וחנות לינדט הגדולה בעולם. צריך להזמין כרטיס לשעה מסוימת באתר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Lindt+Home+of+Chocolate+Kilchberg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:00</time><div class="what"><b>☕ צהריים קלים בקפה של לינדט</b><small>סנדוויצ׳ים, סלטים, ובעיקר קינוחי שוקולד</small></div></li>
+        <li class="drive"><time>13:00</time><div class="what">🚗 לאי מיינאו שליד קונסטנץ (כ־80 ק״מ, כשעה ורבע)</div></li>
+        <li class="key"><time>14:30</time><div class="what"><b>🌷 אי הפרחים מיינאו (Mainau)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">שבילים סלולים, עם כמה עליות. אפשר לשכור עגלות במקום</small><small>גנים פורחים, בית פרפרים טרופי, חוות ליטוף, טירה ונוף לאגם. יש גם "ארץ הילדים" עם מגרש משחקים ענק ובית עץ. בקיץ פתוח עד הערב · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Insel+Mainau+Parkplatz">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>17:30</time><div class="what"><b>🍽️ ארוחת ערב מוקדמת ב־Schwedenschenke<button class="menu-btn" type="button" data-menu="menu-day6">📋 תפריט</button></b><small>המסעדה של האי, ליד הנמל</small></div></li>
+        <li class="drive"><time>19:00</time><div class="what">🚗 חזרה לזינגן (כ־35 ק״מ, 35 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Mainau|wiki:de:Mainau" data-label="אי הפרחים מיינאו" data-fallback="🌷"></div>
+          <div class="ph" data-img="wiki:Lindt Home of Chocolate|wiki:de:Lindt Home of Chocolate|wiki:Lindt & Sprüngli" data-label="בית השוקולד של לינדט" data-fallback="🍫"></div>
+          <div class="ph" data-img="wiki:Kilchberg, Zurich|wiki:Lake Zurich" data-label="אגם ציריך" data-fallback="🏞️"></div>
+        </div>
+        <div class="tip"><b>🇨🇭 ויניטה שוויצרית:</b> בכבישים המהירים בשוויץ חייבים ויניטה. היא עולה 40 פרנק ותקפה לשנה קלנדרית. קונים אותה מראש כ־e-vignette באתר הרשמי via.admin.ch, לפי מספר הרכב, ואז לא צריך מדבקה. אפשר גם בגבול. בלי ויניטה הקנס הוא 200 פרנק.</div>
+        <div class="tip"><b>💶 כסף בשוויץ:</b> משלמים בפרנק שוויצרי (CHF). כמעט בכל מקום אפשר לשלם בכרטיס אשראי. אצל לינדט: ילדים מתחת לגיל 8 נכנסים בחינם. במיינאו: ילדים עד גיל 12 בחינם (לבדוק את המחיר העדכני באתר mainau.de).</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 7 ================= -->
+<article class="day" id="day7">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Rhine Falls|wiki:de:Rheinfall" data-fallback="💦"></div>
+    <div class="day-title">
+      <span class="day-num">שבת · 21.8</span>
+      <h3>קונסטנץ ואגם בודן · מפלי הריין ← טיטיזה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="7"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-bodensee">🚨 חירום באזור</a>
+      <a class="chip sos" href="#sos-ch">🚨 חירום בשוויץ</a>
+      <span class="chip depart">⏰ יציאה 09:00 (עם המזוודות)</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li><time>08:30</time><div class="what"><b>צ׳ק־אאוט מהמלון בזינגן</b></div></li>
+        <li class="drive"><time>09:00</time><div class="what">🚗 לקונסטנץ (כ־35 ק״מ, 35 דק׳)</div></li>
+        <li class="key"><time>09:45</time><div class="what"><b>⛵ נמל קונסטנץ ופסל האימפריה<span class="pram ok">👶 מתאים לעגלה</span></b><small>טיילת על האגם, הפסל המסתובב בכניסה לנמל, ספינות וברבורים. משם הולכים ברגל לעיר העתיקה (Niederburg) ולכיכר השוק · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Imperia+Konstanz+Hafen">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:00</time><div class="what"><b>🍽️ צהריים ב־Brauhaus Johann Albrecht<button class="menu-btn" type="button" data-menu="menu-day7">📋 תפריט</button></b><small>Konradigasse 2, ליד הנמל · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Brauhaus+Johann+Albrecht+Konstanz">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>13:15</time><div class="what">🚗 למפלי הריין בנויהאוזן, דרך זינגן ותאינגן (כ־55 ק״מ, 55 דק׳). בדרך הזו לא צריך ויניטה</div></li>
+        <li class="key"><time>14:15</time><div class="what"><b>💦 מפלי הריין (Rheinfall), המפלים הגדולים באירופה<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הטיילת בצד של נויהאוזן נגישה. לתצפיות של טירת לאופן יש מעלית, אבל גם מדרגות</small><small>⛴️ סירה קטנה לוקחת לסלע שבאמצע המפלים, ועולים עליו במדרגות. אפשר גם לבחור בשייט קצר מסביב לבריכה שמתחת למפלים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Rheinfall+Parkplatz+Neuhausen">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>16:15</time><div class="what">🚗 לטיטיזה, דרך בלומברג ולנצקירך (כ־80 ק״מ, כשעה ורבע)</div></li>
+        <li><time>17:30</time><div class="what"><b>🛒 קניות בסופר בטיטיזה-נוישטאדט</b><small>מחר יום ראשון והכול סגור. קונים לשבוע: מים, חטיפים לטיולים, פירות וארוחות בוקר אם צריך · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Lidl+Titisee-Neustadt">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>18:15</time><div class="what"><b>צ׳ק־אין ב־Maritim TitiseeHotel 🎟️</b><small>בקבלה מבקשים את הכרטיס האדום (Hochschwarzwald Card) לכל אחד מבני המשפחה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Maritim+TitiseeHotel+Titisee-Neustadt">🗺️ גוגל מפות</a></small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Rhine Falls|wiki:de:Rheinfall" data-label="מפלי הריין" data-fallback="💦"></div>
+          <div class="ph" data-img="wiki:Imperia (statue)|wiki:Konstanz" data-label="פסל האימפריה, קונסטנץ" data-fallback="⛵"></div>
+          <div class="ph" data-img="wiki:Laufen Castle|wiki:de:Schloss Laufen" data-label="טירת לאופן מעל המפלים" data-fallback="🏰"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> במפלי הריין חונים בצד של נויהאוזן (Rheinfallquai), שם קרוב לסירות. משלמים בפרנקים או בכרטיס אשראי. בקונסטנץ חונים בחניון Döbele או Altstadt.</div>
+        <div class="alt"><b>חלופה:</b> בבוקר אפשר לעלות על ספינה מקונסטנץ למירסבורג (Meersburg), שמעבר לאגם, או במעבורת הרכבים. זה קצת מאריך את היום.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 8 ================= -->
+<article class="day" id="day8">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Feldberg (Black Forest)|wiki:de:Feldberg (Schwarzwald)" data-fallback="🚡"></div>
+    <div class="day-title">
+      <span class="day-num">יום ראשון · 22.8</span>
+      <h3>רכבל הפלדברג והמגדל · שייט באגם טיטיזה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="8"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <a class="chip redcard" href="#catalog">🎟️ יום בכרטיס האדום</a>
+      <span class="chip depart">⏰ יציאה 09:15</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:15</time><div class="what">🚗 לפלדברג, לחניון של הרכבל (כ־20 ק״מ, 25 דק׳). אפשר לנסוע גם באוטובוס 7300, בחינם עם הכרטיס</div></li>
+        <li class="key"><time>09:45</time><div class="what"><b>🚡 רכבל הפלדברג (Feldbergbahn) ומגדל הפלדברג<span class="card-tag inc">🎟️ כלול בכרטיס</span><span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">הרכבל והמגדל נגישים. השבילים בפסגה הם שבילי חצץ רחבים</small><small>עולים לפסגת הזֶבּוּק (Seebuck). במגדל התצפית רואים בימים בהירים את האלפים. במגדל יש גם מוזיאון קטן של כלבי סן ברנרד · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Feldbergbahn+Talstation+Feldberg">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>11:00</time><div class="what"><b>🥾 מסלול קצר לנקודת התצפית על אגם פלדזה (Feldsee)</b><small>כ־20 דק׳ הליכה מהתחנה העליונה לתצפית על אגם הקרחונים שבתחתית המצוק. מי שרוצה יותר יורד לאגם עצמו (שעתיים הלוך ושוב, תלול)</small></div></li>
+        <li class="food"><time>12:30</time><div class="what"><b>🍽️ צהריים ב־St. Wilhelmer Hütte, הבקתה הגבוהה ביער השחור<button class="menu-btn" type="button" data-menu="menu-day8">📋 תפריט</button></b><small>כ־30 דק׳ הליכה נוחה מהתחנה העליונה בדרך לפסגה הראשית. חלופה קרובה: מסעדת הר ליד הרכבל</small></div></li>
+        <li><time>14:00</time><div class="what"><b>🏔️ "בית הטבע" (Haus der Natur) ליד התחנה התחתונה</b><small>תערוכה קטנה לילדים על בעלי החיים של ההר. הכניסה חינם</small></div></li>
+        <li class="drive"><time>15:00</time><div class="what">🚗 חזרה לטיטיזה (25 דק׳)</div></li>
+        <li class="key"><time>15:45</time><div class="what"><b>⛴️ שייט מסביב לאגם טיטיזה<span class="card-tag inc">🎟️ כלול בכרטיס</span><span class="pram ok">👶 מתאים לעגלה</span></b><small>שייט של כ־25 דק׳ ברחבי האגם, שיוצא מהרציף שבטיילת. אחר כך גלידה על הטיילת, ולמי שרוצה שעה בסירת פדלים</small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:de:Feldbergturm|wiki:Feldberg (Black Forest)" data-label="מגדל הפלדברג" data-fallback="🗼"></div>
+          <div class="ph" data-img="wiki:de:Feldsee|wiki:Feldsee" data-label="אגם פלדזה" data-fallback="💙"></div>
+          <div class="ph" data-img="wiki:Titisee|wiki:de:Titisee" data-label="אגם טיטיזה" data-fallback="⛴️"></div>
+        </div>
+        <div class="tip"><b>🎟️ איך משתמשים בכרטיס:</b> מראים את הקוד (QR) של כל אחד מבני המשפחה בקופה או בשער. רוב ההטבות תקפות <b>פעם אחת בכל שהייה</b>. בפסגה קר ונושבת רוח גם באוגוסט (בערך 15°), אז כדאי לקחת סווטשירט לכל אחד.</div>
+        <div class="opts"><b class="h">🎟️ עוד אפשרויות קרובות בכרטיס</b><ul>
+          <li>🚣 סירות פדלים בשוּכזה, ליד הסכר (כלול). כ־25 דק׳ נסיעה</li>
+          <li>🗼 מגדל התצפית בהוכפירסט (Hochfirst) מעל נוישטאדט. לבדוק אם הרכבל פועל בקיץ</li>
+          <li>🌧️ ביום גשם: בריכת Badeparadies Schwarzwald בטיטיזה (בכרטיס יש מחיר מוזל)</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 9 ================= -->
+<article class="day" id="day9">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:de:Todtnauer Wasserfall|wiki:Todtnau" data-fallback="🛷"></div>
+    <div class="day-title">
+      <span class="day-num">יום שני · 23.8</span>
+      <h3>טודנאו: מגלשת ההרים הארוכה בגרמניה · גשר תלוי · מפל</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="9"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 09:30</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:30</time><div class="what">🚗 לטודנאו דרך פלדברג (כ־35 ק״מ, 40 דק׳)</div></li>
+        <li class="key"><time>10:15</time><div class="what"><b>🛷 Hasenhorn Coaster: רכבל כיסאות ומגלשת הרים של 2.9 ק״מ<span class="card-tag pay">💶 בתשלום</span><span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">העגלה נשארת בתחנה התחתונה</small><small>עולים ברכבל כיסאות לפסגת ההאזנהורן (כ־10 דק׳), ויורדים במגלשה על מסילה, עם עיקולים חדים ושלושה סיבובי מעגל. מגיל 3 וגובה 95 ס״מ נוסעים עם מבוגר, ומגיל 8 וגובה 1.40 מ׳ לבד. כל אחד שולט במהירות שלו. פתוח כל יום 10:00–16:30, לפי מזג האוויר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Hasenhorn+Rodelbahn+Todtnau">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍽️ צהריים בטודנאו</b><small>במסעדה ליד התחנה התחתונה או בעיירה</small></div></li>
+        <li class="drive"><time>13:30</time><div class="what">🚗 למפל של טודנאו (כ־5 ק״מ, 10 דק׳)</div></li>
+        <li class="key"><time>13:45</time><div class="what"><b>💧 מפל טודנאו (Todtnauer Wasserfall) והגשר התלוי blackforestline<span class="card-tag chk">❓ לבדוק בכרטיס</span><span class="pram no">👶 לא לעגלה</span></b><small class="pn">שביל עם מדרגות ושורשים. לקחת מנשא</small><small>מפל של 97 מ׳ בכמה מדרגות, אחד הגבוהים בגרמניה. מסלול של כ־1.5 ק״מ מוביל לאורך המפל אל הגשר התלוי, שאורכו כ־450 מ׳, ותלוי גבוה מעל העמק · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Todtnauer+Wasserfall+Parkplatz">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>16:00</time><div class="what">🚗 חזרה לטיטיזה (40 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:de:Todtnauer Wasserfall|wiki:Todtnau" data-label="מפל טודנאו" data-fallback="💧"></div>
+          <div class="ph" data-img="wiki:de:Hasenhorn (Schwarzwald)|wiki:de:Hasenhorn|wiki:Todtnau" data-label="האזנהורן" data-fallback="🛷"></div>
+          <div class="ph" data-img="wiki:de:Hängebrücke Todtnau|wiki:de:Todtnau" data-label="הגשר התלוי בטודנאו" data-fallback="🌉"></div>
+        </div>
+        <div class="tip"><b>💶 המגלשה לא בכרטיס:</b> לפי האתר של מפעיל ההאזנהורן, הם לא שותפים של הכרטיס האדום. קונים כרטיסים רק בקופה במקום, ויש כרטיסים משולבים לכמה נסיעות. במפל ובגשר בעלי הכרטיס מקבלים לפעמים הנחה או כניסה חינם, ולכן כדאי להראות את הכרטיס בקופה.</div>
+        <div class="opts"><b class="h">🎟️ עוד אפשרויות קרובות</b><ul>
+          <li>🚠 רכבל הבלכן (Belchenbahn), כ־25 דק׳ מטודנאו. ראו ביום 13</li>
+          <li>🦌 Steinwasen-Park נמצא בדרך חזרה דרך נוטשריי. ראו ביום 11</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 10 ================= -->
+<article class="day" id="day10">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Freiburg Minster|wiki:Freiburg im Breisgau" data-fallback="⛪"></div>
+    <div class="day-title">
+      <span class="day-num">יום שלישי · 24.8</span>
+      <h3>רכבל השאואינסלנד · פרייבורג</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="10"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 09:15</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:15</time><div class="what">🚗 לתחנה התחתונה של רכבל השאואינסלנד בהורבן, דרך עמק הגיהנום (כ־45 ק״מ, 50 דק׳)</div></li>
+        <li class="key"><time>10:15</time><div class="what"><b>🚡 רכבל השאואינסלנד (Schauinslandbahn)<span class="card-tag chk">❓ לבדוק בכרטיס</span><span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">קרונות גדולים ונגישים</small><small>רכבל הגונדולות הארוך בגרמניה: 3.6 ק״מ, כ־20 דק׳ לכל כיוון. בפסגה יש מגדל תצפית, שביל פנורמה נגיש ומגרש משחקים. באוגוסט פתוח 9:00–18:00 · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Schauinslandbahn+Talstation+Horben">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>12:15</time><div class="what">🚗 למרכז פרייבורג (כ־12 ק״מ, 20 דק׳). חונים בחניון Schlossberggarage או Karlsbau</div></li>
+        <li class="food"><time>12:45</time><div class="what"><b>🍽️ צהריים ב־Markthalle Freiburg<button class="menu-btn" type="button" data-menu="menu-day10">📋 תפריט</button></b><small>אולם שווקים עם דוכני אוכל מכל העולם, כך שכל אחד בוחר מה שבא לו · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Markthalle+Freiburg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>⛪ העיר העתיקה, הקתדרלה ו"הבֶּכְלֶה"<span class="pram ok">👶 מתאים לעגלה</span></b><small>תעלות מים קטנות (Bächle) זורמות לאורך הרחובות. הילדים משיטים בהן סירות עץ שקונים בחנויות. לפי האגדה, מי שדורך בטעות בתעלה יתחתן עם מישהו מפרייבורג. בכיכר הקתדרלה יש שוק כל בוקר חוץ מיום ראשון</small></div></li>
+        <li><time>15:30</time><div class="what"><b>🚞 רכבל הגבעה (Schlossbergbahn) לתצפית מעל העיר</b><small>רכבל קצר מהפארק העירוני לגבעת השלוסברג, עם מגדל תצפית ובית קפה</small></div></li>
+        <li class="drive"><time>16:45</time><div class="what">🚗 חזרה לטיטיזה (כ־35 ק״מ, 40 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Freiburg Minster|wiki:Freiburg im Breisgau" data-label="פרייבורג והקתדרלה" data-fallback="⛪"></div>
+          <div class="ph" data-img="wiki:Schauinslandbahn|wiki:de:Schauinslandbahn" data-label="רכבל השאואינסלנד" data-fallback="🚡"></div>
+          <div class="ph" data-img="wiki:de:Freiburger Bächle|wiki:Freiburg im Breisgau" data-label="הבכלה" data-fallback="💧"></div>
+        </div>
+        <div class="tip"><b>🚆 חלופה בלי אוטו:</b> עם הכרטיס האדום (וגם עם כרטיס האורח KONUS) נוסעים בחינם ברכבת מטיטיזה לפרייבורג, ברכבת עמק הגיהנום (Höllentalbahn). הנסיעה לוקחת כ־40 דק׳, והחשמליות בתוך פרייבורג כלולות גם הן. ככה לא מחפשים חניה בעיר.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 11 ================= -->
+<article class="day" id="day11">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:de:Steinwasen-Park|wiki:de:Oberried (Breisgau)" data-fallback="🦌"></div>
+    <div class="day-title">
+      <span class="day-num">יום רביעי · 25.8</span>
+      <h3>Steinwasen-Park: שתי מגלשות הרים, גשר תלוי ופארק חיות</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="11"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <a class="chip redcard" href="#catalog">🎟️ יום בכרטיס האדום</a>
+      <span class="chip depart">⏰ יציאה 09:30</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:30</time><div class="what">🚗 לאוברריד, דרך נוטשריי (כ־30 ק״מ, 35 דק׳)</div></li>
+        <li class="key"><time>10:00</time><div class="what"><b>🦌 Steinwasen-Park<span class="card-tag inc">🎟️ כלול בכרטיס</span><span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הפארק על צלע ההר, עם עליות תלולות</small><small>פארק חיות בר על צלע ההר (איילים, יעלים, זאבים ודובי רקון) עם גשר תלוי באורך 218 מ׳. יש שתי מגלשות הרים, כל אחת באורך כ־800 מ׳, מתקנים לילדים ומגרשי משחקים. הכרטיס כולל כניסה אחת, עם כל המתקנים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Steinwasen-Park+Oberried">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:30</time><div class="what"><b>🍽️ צהריים במסעדה של הפארק</b><small>או פיקניק עם אוכל מהסופר</small></div></li>
+        <li><time>13:30</time><div class="what"><b>🛷 עוד סיבובים במגלשות ובגשר</b><small>הפארק פתוח 10:00–18:00</small></div></li>
+        <li class="drive"><time>15:30</time><div class="what">🚗 חזרה לטיטיזה (35 דק׳). בדרך אפשר לעצור באגם ובחופי הרחצה</div></li>
+        <li><time>16:30</time><div class="what"><b>🏊 זמן חופשי באגם טיטיזה</b><small>רחצה בחוף Strandbad Titisee, סירות פדלים או מנוחה במלון</small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:de:Steinwasen-Park" data-label="Steinwasen-Park" data-fallback="🌉"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> מראים את הקוד של הכרטיס בקופה הראשית. במסעדה ובמכוניות החשמליות למגרש המשחקים משלמים בנפרד. ביום חם כדאי להתחיל מהגשר והמגלשות, לפני שהשמש גבוהה.</div>
+        <div class="opts"><b class="h">🎟️ אפשרויות נוספות בכרטיס</b><ul>
+          <li>🎠 Tatzmania בלפינגן: פארק חיות ושעשועים קטן, 20 דק׳ מטיטיזה (כלול)</li>
+          <li>🎈 Spass-Park בשוכזה (כלול)</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 12 ================= -->
+<article class="day" id="day12">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:de:Ravennaschlucht|wiki:Ravenna Bridge|wiki:de:Ravennabrücke" data-fallback="🌲"></div>
+    <div class="day-title">
+      <span class="day-num">יום חמישי · 26.8</span>
+      <h3>ערוץ רוונה · הינטרצרטן · אגם שוכזה</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="12"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 09:30 · יום רגוע</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:30</time><div class="what">🚗 לחניון Hofgut Sternen בבְּרייטְנָאוּ (כ־12 ק״מ, 15 דק׳)</div></li>
+        <li class="key"><time>09:45</time><div class="what"><b>🌲 ערוץ רוונה (Ravennaschlucht)<span class="card-tag pay">חינם</span><span class="pram no">👶 לא לעגלה</span></b><small class="pn">שביל עם מדרגות, גשרי עץ ושורשים. לקחת מנשא</small><small>מסלול מעגלי של כ־5 ק״מ (כשעתיים) לאורך נחל יער, עם מפלים קטנים, גשרי עץ וטחנת מים ישנה. עוברים מתחת לגשר הרכבת הענק של רוונה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Hofgut+Sternen+Breitnau">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍽️ צהריים ב־Hofgut Sternen</b><small>מסעדה בכניסה לערוץ, עם סדנת זכוכית ושעונים</small></div></li>
+        <li class="drive"><time>13:30</time><div class="what">🚗 לשוכזה (כ־30 ק״מ, 35 דק׳)</div></li>
+        <li class="key"><time>14:15</time><div class="what"><b>🚣 סירות פדלים באגם שוכזה (Schluchsee)<span class="card-tag inc">🎟️ כלול בכרטיס</span><span class="pram ok">👶 מתאים לעגלה</span></b><small>ההשכרה ליד הסכר (Staumauer) כלולה בכרטיס. האגם הגדול ביער השחור, עם טיילת, חוף רחצה (Aqua Fun Strandbad) ומים נקיים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Schluchsee+Staumauer">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>17:00</time><div class="what">🚗 חזרה לטיטיזה (כ־20 ק״מ, 25 דק׳)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Schluchsee|wiki:de:Schluchsee" data-label="אגם שוכזה" data-fallback="🚣"></div>
+          <div class="ph" data-img="wiki:de:Ravennaschlucht|wiki:Ravenna Bridge" data-label="ערוץ רוונה" data-fallback="🌲"></div>
+          <div class="ph" data-img="wiki:Hinterzarten|wiki:de:Hinterzarten" data-label="הינטרצרטן" data-fallback="🏡"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> אחרי גשם השביל בערוץ חלקלק, אז נועלים נעלי הליכה. אם הקטן מתעייף, אפשר לעשות רק את החצי התחתון, מהטחנה ועד גשר הרכבת, ולחזור באותה דרך (כשעה).</div>
+        <div class="opts"><b class="h">🌧️ אם יורד גשם</b><ul>
+          <li>🏊 Badeparadies Schwarzwald בטיטיזה, בריכה מקורה עם מגלשות (בכרטיס: מחיר מוזל)</li>
+          <li>⛏️ מכרה הכסף Teufelsgrund במינסטרטל (לבדוק בכרטיס). ראו ביום 13</li>
+          <li>🚆 נסיעה ברכבת לפרייבורג (חינם בכרטיס) ומוזיאונים בעיר</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 13 ================= -->
+<article class="day" id="day13">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Belchen (Black Forest)|wiki:de:Belchen (Schwarzwald)" data-fallback="🚠"></div>
+    <div class="day-title">
+      <span class="day-num">יום שישי · 27.8</span>
+      <h3>רכבל הבלכן · מכרה הכסף במינסטרטל · שטאופן</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="13"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <span class="chip depart">⏰ יציאה 09:15</span>
+      <span class="chip stay-titisee">🛏️ Maritim TitiseeHotel</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="drive"><time>09:15</time><div class="what">🚗 לתחנה התחתונה של רכבל הבלכן, דרך טודנאו (כ־50 ק״מ, כשעה)</div></li>
+        <li class="key"><time>10:15</time><div class="what"><b>🚠 רכבל הבלכן (Belchenbahn)<span class="card-tag pay">💶 בתשלום</span><span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">הגונדולות נגישות. השביל לפסגה רחב, עם עלייה</small><small>גונדולות לפסגה של 1,414 מ׳. מסביב לפסגה יש מסלול מעגלי של כ־40 דק׳ עם נוף של 360 מעלות: עמק הריין, הווֹגֶזים, ובימים בהירים גם שרשרת האלפים, מהמונבלאן ועד הצוגשפיצה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Belchenbahn+Talstation+Aitern">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍽️ צהריים ב־Belchenhaus, ליד התחנה העליונה</b></div></li>
+        <li class="drive"><time>13:30</time><div class="what">🚗 למינסטרטל (כ־20 ק״מ, 30 דק׳)</div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>⛏️ מכרה הכסף Teufelsgrund<span class="card-tag chk">❓ לבדוק בכרטיס</span><span class="pram no">👶 לא לעגלה</span></b><small class="pn">בתוך המכרה יש רצפה לא אחידה וטמפרטורה של כ־10° כל השנה</small><small>סיור מודרך עם קסדות במנהרות של מכרה ישן. מתאים גם ליום גשם. לבדוק את שעות הסיורים באתר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Besucherbergwerk+Teufelsgrund+M%C3%BCnstertal">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>15:30</time><div class="what"><b>🏘️ העיירה שטאופן (Staufen im Breisgau)</b><small>עיירה ציורית שבה, לפי האגדה, השטן לקח את פאוסט. גלידה בכיכר העירייה (15 דק׳ נסיעה)</small></div></li>
+        <li class="drive"><time>16:30</time><div class="what">🚗 חזרה לטיטיזה דרך פרייבורג (כ־55 ק״מ, כשעה)</div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Belchen (Black Forest)|wiki:de:Belchen (Schwarzwald)" data-label="פסגת הבלכן" data-fallback="🚠"></div>
+          <div class="ph" data-img="wiki:Staufen im Breisgau|wiki:de:Staufen im Breisgau" data-label="שטאופן" data-fallback="🏘️"></div>
+          <div class="ph" data-img="wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" data-label="מינסטרטל" data-fallback="⛏️"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> לפי מקורות קודמים, הכרטיס האדום כולל את רכבל הבלכן רק בעונת החורף. בקיץ, לבדוק בקופה אם יש הנחה. אם ההר בעננים (רואים במצלמות), מחליפים את הסדר: בבוקר המכרה ושטאופן, ואחר הצהריים הבלכן.</div>
+        <div class="opts"><b class="h">🛷 רוצים עוד מגלשת הרים?</b><ul>
+          <li>חוזרים להאזנהורן בטודנאו (15 דק׳ מהבלכן) לעוד סיבוב, או לכרטיס משולב</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 14 ================= -->
+<article class="day" id="day14">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Triberg Waterfalls|wiki:de:Triberger Wasserfälle" data-fallback="💦"></div>
+    <div class="day-title">
+      <span class="day-num">שבת · 28.8</span>
+      <h3>מפלי טריברג · מגלשת ההרים בגוטאך ← פרנקפורט</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="14"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-titisee">🚨 חירום באזור</a>
+      <a class="chip sos" href="#sos-fra">🚨 חירום בפרנקפורט</a>
+      <span class="chip depart">⏰ יציאה 09:00 (עם המזוודות)</span>
+      <span class="chip stay-fra">🛏️ Zleep Hotel Frankfurt Airport</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li><time>08:30</time><div class="what"><b>צ׳ק־אאוט מהמלון בטיטיזה</b></div></li>
+        <li class="drive"><time>09:00</time><div class="what">🚗 צפונה לטריברג (כ־50 ק״מ, 50 דק׳)</div></li>
+        <li class="key"><time>10:00</time><div class="what"><b>💦 מפלי טריברג (Triberger Wasserfälle)<span class="card-tag chk">❓ לבדוק בכרטיס</span><span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">השביל התחתון סלול, ומעליו יש מדרגות</small><small>המפלים הגבוהים בגרמניה, 163 מ׳ בשבעה מדרגים. סנאים מאכילים מהיד, ולכן כדאי לקנות בכניסה שקית בוטנים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Triberger+Wasserf%C3%A4lle+Parkplatz">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>11:30</time><div class="what"><b>🍰 עוגת היער השחור המקורית ב־Café Schäfer<button class="menu-btn" type="button" data-menu="menu-day14">📋 תפריט</button></b><small>הקונדיטוריה שבה שומרים את המתכון המקורי משנת 1915 · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Cafe+Sch%C3%A4fer+Triberg">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>12:15</time><div class="what"><b>🕰️ שעון הקוקייה הגדול בעולם</b><small>באזור שׁוֹנאך וטריברג יש שני שעונים ענקיים שמתחרים על התואר. בכל חצי שעה יוצאת מהם הציפור</small></div></li>
+        <li class="drive"><time>12:45</time><div class="what">🚗 לגוטאך (כ־20 ק״מ, 25 דק׳)</div></li>
+        <li class="key"><time>13:15</time><div class="what"><b>🛷 מגלשת ההרים בגוטאך (Schwarzwaldbob)<span class="card-tag pay">💶 בתשלום</span><span class="pram part">👶 חלקית לעגלה</span></b><small>מגלשת הרים של 1,150 מ׳ על צלע ההר, עם עיקולים וקפיצות. פתוח כל יום 10:00–18:00, לפי מזג האוויר. ממש ליד נמצא מוזיאון הכפר הפתוח Vogtsbauernhof · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Sommerrodelbahn+Gutach">🗺️ גוגל מפות</a></small></div></li>
+        <li class="drive"><time>14:30</time><div class="what">🚗 לפרנקפורט דרך אופנבורג וכביש A5 (כ־230 ק״מ, כשעתיים וחצי). עוצרים פעם אחת בתחנת דלק לשירותים ולהפסקה</div></li>
+        <li><time>17:15</time><div class="what"><b>⛽ תדלוק מלא</b><small>לפני החזרת הרכב</small></div></li>
+        <li class="key"><time>17:30</time><div class="what"><b>צ׳ק־אין ב־Zleep Hotel Frankfurt Airport</b><small>Fuji-Allee, Kelsterbach. אריזה וסידור המזוודות לטיסה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Zleep+Hotel+Frankfurt+Airport+Kelsterbach">🗺️ גוגל מפות</a></small></div></li>
+        <li class="food"><time>18:30</time><div class="what"><b>🍕 ארוחת ערב קלה</b><small>בקלסטרבאך או בשדה התעופה</small></div></li>
+      </ol>
+      <div>
+        <div class="gallery">
+          <div class="ph wide" data-img="wiki:Triberg Waterfalls|wiki:de:Triberger Wasserfälle" data-label="מפלי טריברג" data-fallback="💦"></div>
+          <div class="ph" data-img="wiki:Black Forest Open Air Museum|wiki:de:Schwarzwälder Freilichtmuseum Vogtsbauernhof" data-label="Vogtsbauernhof, גוטאך" data-fallback="🏡"></div>
+          <div class="ph" data-img="wiki:Cuckoo clock|wiki:de:Kuckucksuhr" data-label="שעון קוקייה" data-fallback="🕰️"></div>
+        </div>
+        <div class="tip"><b>💡 טיפ:</b> הכרטיס האדום תקף עד יום הצ׳ק־אאוט. כדאי לנצל הבוקר הטבה שעוד לא השתמשתם בה. בטריברג מראים את הכרטיס בקופה, כי לפעמים יש הנחה לבעלי כרטיס אורח.</div>
+        <div class="alt"><b>מסלול חלופי בכרטיס:</b> בבוקר עושים שייט באגם טיטיזה, אם לא הספקתם, או סיבוב אחרון ברכבל הפלדברג. משם נוסעים ישר לפרנקפורט (כשלוש שעות).</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= DAY 15 ================= -->
+<article class="day" id="day15">
+  <div class="day-head">
+    <div class="ph" data-img="wiki:Frankfurt Airport|wiki:Frankfurt" data-fallback="✈️"></div>
+    <div class="day-title">
+      <span class="day-num">יום ראשון · 29.8</span>
+      <h3>החזרת הרכב וטיסה הביתה ✈️</h3>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="daysum" data-day="15"></div>
+    <div class="meta">
+      <a class="chip sos" href="#sos-fra">🚨 חירום באזור</a>
+      <span class="chip">🛫 המראה · פרנקפורט (FRA)</span>
+    </div>
+    <div class="grid">
+      <ol class="timeline">
+        <li class="food"><time dir="ltr">−4:15</time><div class="what"><b>ארוחת בוקר במלון</b><small>השעות כאן הן ביחס לשעת ההמראה. מעדכנים כשיהיו שעות הטיסה</small></div></li>
+        <li class="drive"><time dir="ltr">−3:45</time><div class="what">🚗 יציאה לשדה התעופה (כ־10 דק׳)</div></li>
+        <li class="key"><time dir="ltr">−3:30</time><div class="what"><b>🚗 החזרת הרכב השכור</b><small>בחניון החזרת הרכבים (Mietwagenrückgabe) של הטרמינל שממנו יוצאת הטיסה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Mietwagenr%C3%BCckgabe+Flughafen+Frankfurt">🗺️ גוגל מפות</a></small></div></li>
+        <li><time dir="ltr">−3:00</time><div class="what"><b>צ׳ק־אין ובידוק ביטחוני</b><small>בטיסות לישראל מגיעים לפחות שלוש שעות לפני ההמראה</small></div></li>
+        <li class="key"><time>🛫</time><div class="what"><b>המראה הביתה</b><small>להתראות, יער שחור!</small></div></li>
+      </ol>
+      <div>
+        <div class="tip"><b>💡 טיפ:</b> בשדה התעופה בפרנקפורט יש שני טרמינלים רחוקים זה מזה. לבדוק מראש מאיזה טרמינל יוצאת הטיסה, ולהחזיר את הרכב בחניון של אותו טרמינל.</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ================= RED CARD CATALOG ================= -->
+<section id="catalog">
+  <h2 class="sec">🎟️ אטרקציות בכרטיס האדום</h2>
+  <p class="sec-sub">כל מה שאפשר לעשות מטיטיזה, עם סימון של מה כלול בכרטיס. העדפנו רכבלים ומגלשות הרים, ופחות פארקי שעשועים ומים, כי כבר יהיו בפארק אירופה וברולנטיקה. לחיצה על סינון מציגה רק את מה שמתאים.</p>
+  <div class="redcard-head">
+    <div class="rc">HOCH<br>SCHWARZ<br>WALD<br>CARD</div>
+    <p><b>הכרטיס האדום (Hochschwarzwald Card)</b> ניתן בחינם לאורחי מלון Maritim בטיטיזה שישנים לפחות שני לילות. הוא כולל יותר מ־80 אטרקציות בחינם, בדרך כלל <b>פעם אחת בכל שהייה</b> לכל אדם, ונסיעה חינם באוטובוסים וברכבות באזור (KONUS). רשימת ההטבות משתנה בכל עונה, ולכן לפני הנסיעה בודקים את הרשימה העדכנית באתר <a target="_blank" rel="noopener" href="https://www.hochschwarzwald.de/planen-buchen/hochschwarzwald-card">hochschwarzwald.de/card ↗</a>.</p>
+  </div>
+  <div class="cat-filters" id="catFilters" role="group" aria-label="סינון אטרקציות">
+    <button type="button" data-f="all" class="on">הכול</button>
+    <button type="button" data-f="inc">🎟️ כלול בכרטיס</button>
+    <button type="button" data-f="cable">🚡 רכבלים</button>
+    <button type="button" data-f="coaster">🛷 מגלשות הרים</button>
+    <button type="button" data-f="nature">💧 טבע ומפלים</button>
+    <button type="button" data-f="city">🏘️ עיירות</button>
+    <button type="button" data-f="rain">🌧️ ליום גשם</button>
+    <button type="button" data-f="park">🎠 פארקים</button>
+  </div>
+  <div class="cat-grid" id="catGrid"></div>
+  <p class="tool-note" style="margin-top:12px">🎟️ <b>כלול</b> = מופיע ברשימת ההטבות של 2026 · ❓ <b>לבדוק</b> = מקורות סותרים, או שיש רק הנחה · 💶 <b>בתשלום</b> = לא בכרטיס. המחירים מעוגלים, לפי מחירוני 2026.</p>
+</section>
+
+<!-- ================= WEBCAMS ================= -->
+<section id="cams">
+  <h2 class="sec">📷 מצלמות לייב</h2>
+  <p class="sec-sub">טוב לבדוק בבוקר אם הפסגה בעננים לפני שעולים לרכבל. לחיצה פותחת את המצלמות של המקום.</p>
+  <div class="cams" id="camGrid"></div>
+</section>
+
+<section id="open">
+  <h2 class="sec">✅ פתוח בתאריכים שלנו?</h2>
+  <p class="sec-sub">אוגוסט הוא שיא העונה, ולכן כמעט הכול פתוח כל יום. בדקנו לפי לוחות הזמנים של 2026, כי של 2027 עוד לא פורסמו. כשבוע לפני הטיול כדאי לבדוק שוב באתרים הרשמיים.</p>
+  <div class="panel">
+    <table class="costs open-tbl">
+      <tr><th>אטרקציה</th><th>יום</th><th>סטטוס</th></tr>
+      <tr><td>🏰 טירת היידלברג ורכבל ההרים</td><td>א׳ 15.8</td><td>✅ כל יום, בערך 9:00–18:00</td></tr>
+      <tr><td>⛪ קתדרלת שטרסבורג ו־Batorama</td><td>ב׳ 16.8</td><td>✅ כל יום. 15.8 הוא חג בצרפת, אבל אנחנו מגיעים ב־16.8. את השייט כדאי להזמין מראש</td></tr>
+      <tr><td>🎢 פארק אירופה</td><td>ג׳ 17.8</td><td>✅ פתוח כל יום בעונת הקיץ, בדרך כלל 9:00–18:00 (בחלק מהימים עד מאוחר יותר)</td></tr>
+      <tr><td>🛶 קולמר והר הקופים</td><td>ד׳ 18.8</td><td>✅ השייט כל יום. הר הקופים פתוח באוגוסט כל יום, בערך 10:00–18:00</td></tr>
+      <tr><td>🌊 רולנטיקה</td><td>ה׳ 19.8</td><td>✅ כל יום 9:30–22:00. ⚠️ בקיץ הכרטיסים נגמרים, ולכן מזמינים מראש</td></tr>
+      <tr><td>🍫 בית השוקולד של לינדט</td><td>ו׳ 20.8</td><td>✅ כל יום 10:00–19:00. צריך להזמין כרטיס לשעה מסוימת</td></tr>
+      <tr><td>🌷 אי מיינאו</td><td>ו׳ 20.8</td><td>✅ כל יום, בקיץ עד הערב</td></tr>
+      <tr><td>💦 מפלי הריין והסירות לסלע</td><td>שבת 21.8</td><td>✅ כל יום. הסירות פועלות לפי גובה המים</td></tr>
+      <tr><td>🚡 רכבל הפלדברג</td><td>א׳ 22.8</td><td>✅ פועל כל יום בקיץ</td></tr>
+      <tr><td>🛷 Hasenhorn Coaster</td><td>ב׳ 23.8</td><td>✅ כל יום 10:00–16:30. נסגר בגשם חזק, ברוח חזקה ובסופות</td></tr>
+      <tr><td>🚡 רכבל השאואינסלנד</td><td>ג׳ 24.8</td><td>✅ בחופש הגדול פתוח 9:00–18:00 (בשאר השנה עד 17:00)</td></tr>
+      <tr><td>🦌 Steinwasen-Park</td><td>ד׳ 25.8</td><td>✅ כל יום 10:00–18:00 בעונה</td></tr>
+      <tr><td>🚠 רכבל הבלכן</td><td>ו׳ 27.8</td><td>✅ פועל בקיץ. לבדוק את השעות באתר</td></tr>
+      <tr><td>💦 מפלי טריברג</td><td>שבת 28.8</td><td>✅ פתוח תמיד. משלמים בכניסה בערך 9:00–19:00</td></tr>
+      <tr><td>🛷 מגלשת ההרים בגוטאך</td><td>שבת 28.8</td><td>✅ כל יום 10:00–18:00, לפי מזג האוויר</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="costs">
+  <h2 class="sec">💰 סיכום עלויות</h2>
+  <p class="sec-sub">ההוצאות הקבועות לפי ההזמנות: מלונות ‎€3,813‎ (‎₪13,045‎), טיסות ‎₪10,528‎ ורכב ‎€1,135‎ (‎₪3,894‎), בסך הכול ‎₪27,467‎. לחישוב הוספנו דלק, חניה וויניטה, כניסה לאטרקציות וארוחות (בלי הסופר). ברירת המחדל: 2 מבוגרים, 2 ילדים בגילי 6–15 וילד אחד בן 3–5. אפשר לשנות כאן את מספר המשתתפים ואת שער היורו, והסכומים בכל הימים יתעדכנו.</p>
+  <div class="cost-wrap">
+    <div class="panel">
+      <h3>פירוט בשקלים</h3>
+      <table class="costs" id="costTable"></table>
+    </div>
+    <div class="panel">
+      <h3>הנחות החישוב</h3>
+      <div class="inputs">
+        <label>מבוגרים<input type="number" id="inAdults" min="0" max="10" value="2"></label>
+        <label>ילדים 6–15<input type="number" id="inKids" min="0" max="10" value="2"></label>
+        <label>ילדים 3–5 (לא נספרים בארוחות)<input type="number" id="inSmall" min="0" max="10" value="1"></label>
+        <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.42"></label>
+        <label><span>סוג הדלק ברכב השכור</span><select id="inFuelType"><option value="petrol" selected>בנזין</option><option value="diesel">דיזל</option></select></label>
+        <label>מחיר דלק לליטר (€)<input type="number" id="inFuel" min="0.5" max="5" step="0.01" value="1.75"></label>
+        <label>צריכה (ל׳/100 ק״מ)<input type="number" id="inCons" min="3" max="20" step="0.1" value="7.5"></label>
+      </div>
+      <div class="live-note" id="liveNote">⏳ טוען שער יורו ומחיר דלק עדכניים…</div>
+      <div class="big-total"><span>סה״כ לטיול (משוער)</span><b id="grandTotal">—</b><span id="grandSub"></span></div>
+      <div class="assume">
+        מחירי הכניסה לפי המחירונים של 2026, מעוגלים. הם יכולים להשתנות עד אוגוסט 2027:
+        <ul>
+          <li>ההוצאות הקבועות מוצגות בשקלים כמו בהזמנות (המלונות והרכב לפי שער של כ־3.42 ₪ ליורו), ולא משתנות עם השער</li>
+          <li>פארק אירופה: כ־€72 למבוגר, כ־€61 לילד 4–11. רולנטיקה: כ־€50 למבוגר, כ־€47 לילד. עד גיל 3 בחינם בשניהם. אם הקטן כבר בן 4, צריך להוסיף לו כרטיס ילד</li>
+          <li>היידלברג (טירה ורכבל): €11 / €5.50 · Batorama: כ־€16 / €8.50 · הר הקופים: כ־€12 / €8 · שייט בקולמר: כ־€7 / €3.50</li>
+          <li>לינדט: 17 פרנק למבוגר, 10 לילד 8–15, מתחת לגיל 8 בחינם · מיינאו: כ־€29 למבוגר, ילדים עד 12 בחינם · מפלי הריין (תצפית וסירה לסלע): כ־€20 / €10</li>
+          <li>בכרטיס האדום (₪0): רכבל הפלדברג והמגדל, שייט בטיטיזה, Steinwasen-Park וסירות פדלים בשוכזה</li>
+          <li>בתשלום: Hasenhorn Coaster (נסיעה אחת, כ־€11 / €8.50) · שאואינסלנד (€15 / €10, אם לא כלול) · בלכן (כ־€12 / €6) · טריברג (€9 / €5) · גוטאך (שתי נסיעות, כ־€9 / €7)</li>
+          <li>חניה ואגרות: כולל ויניטה שוויצרית (40 פרנק, כ־€43) ביום 6</li>
+          <li>ארוחות: צהריים במסעדה (כ־€17 למבוגר, כ־€10 לילד) וערב קל (כ־€10 / €7). הילד בגיל 3–5 לא נספר. ארוחות הבוקר במלונות לא נכללות</li>
+          <li>דלק: רכב משפחתי, כ־7.5 ל׳/100 ק״מ בבנזין או 6 ל׳/100 ק״מ בדיזל. הקניות בסופר והמזכרות לא נכללות</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="prices">
+  <h2 class="sec">📉 מעקב מחירים</h2>
+  <p class="sec-sub" id="ptSub">⏳ טוען…</p>
+  <div class="panel price-track" id="priceTrack">
+    <div class="pt-list" id="ptList"></div>
+  </div>
+</section>
+
+<!-- ================= SOS ================= -->
+<section id="sos">
+  <h2 class="sec">🚨 מספרי חירום</h2>
+  <p class="sec-sub">לחיצה על מספר מחייגת ישר מהטלפון. בכל מצב של סכנת חיים מתקשרים קודם ל־<b>112</b>. המספר עובד בגרמניה, בצרפת ובשוויץ, בחינם, וגם בלי כרטיס SIM.</p>
+  <div class="sos-grid">
+    <div class="sos-card" id="sos-de">
+      <h3>🇩🇪 בכל גרמניה</h3>
+      <p class="sos-sub">כל הימים</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:112">🚑 אמבולנס, כבאות, חילוץ בהרים<b>112</b></a>
+        <a class="tel" href="tel:110">🚓 משטרה<b>110</b></a>
+        <a class="tel" href="tel:116117">🩺 רופא תורן, למקרה דחוף שאינו מסכן חיים<b>116 117</b></a>
+        <a class="tel" href="tel:+4976119240">☠️ מרכז מידע לרעלים, פרייבורג<b>0761 19240</b></a>
+        <a class="tel" href="tel:+498920204000">🚗 ADAC, עזרה בדרכים<b>089 20 20 4000</b></a>
+      </div>
+      <p class="sos-note">🚙 לתקלה ברכב השכור מתקשרים קודם למספר החירום של חברת ההשכרה. הוא מופיע בחוזה, ובדרך כלל גם על מחזיק המפתחות.</p>
+    </div>
+    <div class="sos-card" id="sos-rust">
+      <h3>🎢 רוסט ואטנהיים</h3>
+      <p class="sos-sub">ראשון–חמישי, 15–19.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+49782193">🏥 Ortenau Klinikum Lahr, מיון 24/7<b>07821 93-0</b></a>
+        <a class="tel" href="tel:+497612700">👶 מרכז הילדים, בית החולים האוניברסיטאי פרייבורג<b>0761 270-0</b></a>
+      </div>
+      <p class="sos-note">📍 בית החולים בלאר נמצא כ־20 דק׳ מהמלון · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Ortenau+Klinikum+Lahr">🗺️ ניווט</a>. בפארק אירופה וברולנטיקה יש תחנות עזרה ראשונה.</p>
+    </div>
+    <div class="sos-card" id="sos-fr">
+      <h3>🇫🇷 צרפת (שטרסבורג, קולמר)</h3>
+      <p class="sos-sub">שני 16.8 ורביעי 18.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:112">🆘 חירום אירופי<b>112</b></a>
+        <a class="tel" href="tel:15">🚑 אמבולנס (SAMU)<b>15</b></a>
+        <a class="tel" href="tel:17">🚓 משטרה<b>17</b></a>
+        <a class="tel" href="tel:18">🚒 כבאות<b>18</b></a>
+      </div>
+      <p class="sos-note">🏥 בשטרסבורג, מיון הילדים נמצא בבית החולים Hautepierre · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=H%C3%B4pital+de+Hautepierre+Strasbourg">🗺️ ניווט</a>. בקולמר: Hôpital Pasteur · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=H%C3%B4pital+Pasteur+Colmar">🗺️ ניווט</a></p>
+    </div>
+    <div class="sos-card" id="sos-bodensee">
+      <h3>🌷 זינגן ואגם קונסטנץ</h3>
+      <p class="sos-sub">חמישי–שבת, 19–21.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+49773189">🏥 Hegau-Bodensee-Klinikum Singen<b>07731 89-0</b></a>
+        <a class="tel" href="tel:+4975318010">🏥 Klinikum Konstanz<b>07531 801-0</b></a>
+      </div>
+      <p class="sos-note">📍 בית החולים בזינגן נמצא כ־5 דק׳ מהמלון · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Hegau-Bodensee-Klinikum+Singen">🗺️ ניווט</a></p>
+    </div>
+    <div class="sos-card" id="sos-ch">
+      <h3>🇨🇭 שוויץ (לינדט, מפלי הריין)</h3>
+      <p class="sos-sub">שישי–שבת, 20–21.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:112">🆘 חירום אירופי<b>112</b></a>
+        <a class="tel" href="tel:144">🚑 אמבולנס<b>144</b></a>
+        <a class="tel" href="tel:117">🚓 משטרה<b>117</b></a>
+        <a class="tel" href="tel:1414">🚁 Rega, חילוץ אווירי<b>1414</b></a>
+        <a class="tel" href="tel:145">☠️ מידע לרעלים<b>145</b></a>
+      </div>
+      <p class="sos-note">🏥 ליד מפלי הריין: Kantonsspital Schaffhausen · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Kantonsspital+Schaffhausen">🗺️ ניווט</a></p>
+    </div>
+    <div class="sos-card" id="sos-titisee">
+      <h3>🌲 טיטיזה וההרים</h3>
+      <p class="sos-sub">שבת–שבת, 21–28.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+49765129">🏥 Helios Klinik Titisee-Neustadt<b>07651 29-0</b></a>
+        <a class="tel" href="tel:+497612700">👶 בית החולים האוניברסיטאי פרייבורג, כולל ילדים<b>0761 270-0</b></a>
+      </div>
+      <p class="sos-note">📍 מיון הילדים הגדול באזור נמצא בפרייבורג, ב־Mathildenstraße 1, כ־40 דק׳ מטיטיזה · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Zentrum+f%C3%BCr+Kinder-+und+Jugendmedizin+Freiburg+Mathildenstra%C3%9Fe+1">🗺️ ניווט</a>. בהרים, בפלדברג ובבלכן מתקשרים ל־112.</p>
+    </div>
+    <div class="sos-card" id="sos-fra">
+      <h3>✈️ פרנקפורט ושדה התעופה</h3>
+      <p class="sos-sub">שבת–ראשון, 28–29.8</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+496931060">🏥 Klinikum Frankfurt Höchst, כולל ילדים<b>069 3106-0</b></a>
+        <a class="tel" href="tel:+496963010">🏥 בית החולים האוניברסיטאי פרנקפורט<b>069 6301-0</b></a>
+      </div>
+      <p class="sos-note">📍 בית החולים Höchst נמצא כ־15 דק׳ מהמלון · <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Klinikum+Frankfurt+H%C3%B6chst">🗺️ ניווט</a>. בשדה התעופה יש מרפאה פתוחה כל הזמן.</p>
+    </div>
+    <div class="sos-card" id="sos-il">
+      <h3>🇮🇱 נציגויות ישראל</h3>
+      <p class="sos-sub">לאובדן דרכון, מעצר או מקרה חירום</p>
+      <div class="sos-list">
+        <a class="tel" href="tel:+493089045203">📞 שגרירות ישראל בברלין, קו חירום<b>+49 30 8904 5203</b></a>
+        <a class="tel" href="tel:+33140765500">🇫🇷 שגרירות ישראל בפריז<b>+33 1 40 76 55 00</b></a>
+        <a class="tel" href="tel:+41313563500">🇨🇭 שגרירות ישראל בברן<b>+41 31 356 35 00</b></a>
+      </div>
+      <p class="sos-note">כדאי לוודא את המספרים באתרי הנציגויות לפני הטיסה. הנציגויות סגורות בחגים יהודיים.</p>
+    </div>
+  </div>
+  <p class="sos-note" style="margin-top:12px">את המספרים לקחנו ממדריכי בתי חולים ומאתרי הנציגויות. כדאי לשמור אותם בטלפון לפני הטיסה.</p>
+</section>
+
+<section id="tips">
+  <h2 class="sec">טיפים חשובים לפני שיוצאים</h2>
+  <p class="sec-sub">אמצע אוגוסט: חם בעמק הריין, נעים בהרים, ושיא העונה בכל מקום.</p>
+  <div class="tips">
+    <div class="tipcard"><div class="ico">🎟️</div><h3>להזמין מראש</h3><p>פארק אירופה ורולנטיקה (בקיץ נגמרים הכרטיסים), שעה בבית השוקולד של לינדט, והשייט בשטרסבורג. המחירים בפארקים משתנים לפי היום.</p></div>
+    <div class="tipcard"><div class="ico">🇨🇭</div><h3>ויניטה לשוויץ</h3><p>ביום 6 נוסעים לקילכברג בכבישים מהירים שוויצריים, וצריך e-vignette (40 פרנק) באתר via.admin.ch. למפלי הריין מגיעים בכבישים רגילים, בלי ויניטה.</p></div>
+    <div class="tipcard"><div class="ico">🇫🇷</div><h3>שטרסבורג בלי אוטו</h3><p>בשטרסבורג יש אזור מוגבל לרכבים (ZFE), ונדרשת מדבקת Crit'Air. חונים בחניון P+R בכניסה לעיר ונוסעים בחשמלית. קולמר פתוחה לרכבים.</p></div>
+    <div class="tipcard"><div class="ico">🛒</div><h3>יום ראשון סגור</h3><p>ב־15.8, ב־22.8 וב־29.8 הסופרים בגרמניה סגורים. קונים ביום שני 16.8 באטנהיים, ובשבת 21.8 לפני שמגיעים לטיטיזה.</p></div>
+    <div class="tipcard"><div class="ico">🧥</div><h3>שכבות</h3><p>בעמק הריין ובאלזס חם (25–30°). בטיטיזה 20–23° ביום ו־10° בלילה, ובפסגות כ־15° עם רוח. לוקחים סווטשירט לכל אחד ובגדי ים.</p></div>
+    <div class="tipcard"><div class="ico">🚆</div><h3>הכרטיס האדום</h3><p>מקבלים אותו בצ׳ק־אין במריטים, והוא נשמר כקוד בטלפון. רוב ההטבות תקפות פעם אחת בכל שהייה. אוטובוסים ורכבות באזור חינם, כולל הרכבת לפרייבורג.</p></div>
+  </div>
+</section>
+
+</main>
+
+<h2 class="sec menus-title print-only">📋 תפריטים</h2>
+<dialog class="menu-dlg" id="menu-day1" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>Vetter's Alt Heidelberger Brauhaus</h4>
+          <p>מבשלת בירה ומסעדה גרמנית בעיר העתיקה, ממש ליד הגשר הישן. מנות גדולות ותפריט ילדים.</p>
+          <table class="menu">
+            <tr><td>שניצל ילדים עם צ׳יפס<i>Kinderschnitzel mit Pommes</i></td><td class="pr">~€10</td></tr>
+            <tr><td>נקניקיות עם צ׳יפס<i>Würstchen mit Pommes</i></td><td class="pr">~€8</td></tr>
+            <tr><td>שפצלה עם גבינה<i>Käsespätzle</i></td><td class="pr">~€14</td></tr>
+            <tr><td>שניצל וינאי<i>Schnitzel Wiener Art</i></td><td class="pr">~€18</td></tr>
+          </table>
+          <div class="note">* תפריט ילדים טיפוסי, והמחירים משוערים. לבדוק במקום.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day2" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>Flam's, שטרסבורג</h4>
+          <p>רשת של פלאמקוכן (Tarte flambée), הפיצה הדקה של אלזס. יש תפריט "כמה שרוצים", שבו מגישים פלאמקוכן אחד אחרי השני לשולחן.</p>
+          <table class="menu">
+            <tr><td>פלאמקוכן קלאסי (שמנת, בצל, בייקון)<i>Tarte flambée Tradition</i></td><td class="pr">~€11</td></tr>
+            <tr><td>פלאמקוכן עם גבינה בלבד<i>Tarte flambée Gratinée / Fromage</i></td><td class="pr">~€12</td></tr>
+            <tr><td>ארוחת ילדים<i>Menu enfant</i></td><td class="pr">~€9</td></tr>
+            <tr><td>פלאמקוכן מתוק (תפוחים וקינמון / שוקולד)<i>Tarte flambée sucrée</i></td><td class="pr">~€7</td></tr>
+          </table>
+          <div class="note">* המחירים משוערים. לבדוק במקום.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day3" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>FoodLoop, פארק אירופה</h4>
+          <p>מזמינים במסך שעל השולחן, והאוכל מגיע בסירים קטנים שגולשים במסילות מהתקרה.</p>
+          <table class="menu">
+            <tr><td>המבורגר עם צ׳יפס<i>Burger mit Pommes</i></td><td class="pr">~€14</td></tr>
+            <tr><td>מנת ילדים: נאגטס / פסטה<i>Kinderteller</i></td><td class="pr">~€9</td></tr>
+            <tr><td>שניצל עם צ׳יפס<i>Schnitzel mit Pommes</i></td><td class="pr">~€15</td></tr>
+            <tr><td>קינוח / גלידה<i>Dessert</i></td><td class="pr">~€5</td></tr>
+          </table>
+          <div class="note">* המחירים משוערים. לבדוק במקום. בפארק יש עשרות מסעדות נוספות.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day4" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>Wistub Brenner, קולמר</h4>
+          <p>מסעדה אלזסית קטנה ותיקה על התעלה בונציה הקטנה. בקיץ יושבים בחוץ.</p>
+          <table class="menu">
+            <tr><td>פלאמקוכן<i>Tarte flambée</i></td><td class="pr">~€12</td></tr>
+            <tr><td>שוקרוט אלזסי (כרוב כבוש ונקניקיות)<i>Choucroute garnie</i></td><td class="pr">~€22</td></tr>
+            <tr><td>שניצל ילדים עם צ׳יפס<i>Escalope enfant, frites</i></td><td class="pr">~€11</td></tr>
+            <tr><td>קוגלהופף / טארט עם פירות<i>Kougelhopf · Tarte aux fruits</i></td><td class="pr">~€7</td></tr>
+          </table>
+          <div class="note">* תפריט טיפוסי, והמחירים משוערים. לבדוק במקום.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day6" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט ערב</span>
+          <h4>Schwedenschenke, אי מיינאו</h4>
+          <p>המסעדה של האי, ליד הנמל, עם מרפסת. יש מנות ילדים ודגים מהאגם.</p>
+          <table class="menu">
+            <tr><td>שניצל ילדים עם צ׳יפס<i>Kinderschnitzel mit Pommes</i></td><td class="pr">~€11</td></tr>
+            <tr><td>ספגטי ברוטב עגבניות<i>Spaghetti mit Tomatensoße</i></td><td class="pr">~€9</td></tr>
+            <tr><td>פילה דג מהאגם<i>Bodensee-Felchenfilet</i></td><td class="pr">~€26</td></tr>
+            <tr><td>גלידה<i>Eisbecher</i></td><td class="pr">~€7</td></tr>
+          </table>
+          <div class="note">* תפריט טיפוסי, והמחירים משוערים. לבדוק במקום. באי יש גם מזנונים ובתי קפה זולים יותר.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day7" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>Brauhaus Johann Albrecht, קונסטנץ</h4>
+          <p>מבשלת בירה עם מסעדה בעיר העתיקה, כמה דקות הליכה מהנמל. בקיץ פתוח גם גן הבירה.</p>
+          <table class="menu">
+            <tr><td>שניצל ילדים עם צ׳יפס<i>Kinderschnitzel mit Pommes</i></td><td class="pr">~€10</td></tr>
+            <tr><td>שפצלה עם גבינה<i>Käsespätzle</i></td><td class="pr">~€14</td></tr>
+            <tr><td>פלאמקוכן<i>Flammkuchen</i></td><td class="pr">~€12</td></tr>
+            <tr><td>בייגלה ענק<i>Riesenbrezel</i></td><td class="pr">~€5</td></tr>
+          </table>
+          <div class="note">* תפריט טיפוסי, והמחירים משוערים. לבדוק במקום.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day8" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>St. Wilhelmer Hütte, פלדברג</h4>
+          <p>בקתת ההרים הגבוהה ביער השחור, בגובה כ־1,400 מ׳, עם אוכל ביתי ונוף.</p>
+          <table class="menu">
+            <tr><td>מרק גולש עם לחם<i>Gulaschsuppe</i></td><td class="pr">~€9</td></tr>
+            <tr><td>נקניקיות עם צ׳יפס<i>Würstchen mit Pommes</i></td><td class="pr">~€8</td></tr>
+            <tr><td>קייזרשמארן (פנקייק קרוע עם רסק תפוחים)<i>Kaiserschmarrn mit Apfelmus</i></td><td class="pr">~€13</td></tr>
+            <tr><td>עוגת היער השחור<i>Schwarzwälder Kirschtorte</i></td><td class="pr">~€5</td></tr>
+          </table>
+          <div class="note">* תפריט טיפוסי, והמחירים משוערים. לבדוק במקום.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day10" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 תפריט צהריים</span>
+          <h4>Markthalle Freiburg</h4>
+          <p>אולם עם דוכני אוכל: איטלקי, אסייתי, טורקי, מקסיקני, גרמני ועוד. יושבים יחד באמצע, וכל אחד מביא מה שבא לו.</p>
+          <table class="menu">
+            <tr><td>פסטה / פיצה<i>Pasta · Pizza</i></td><td class="pr">~€9–12</td></tr>
+            <tr><td>פלאפל / שווארמה<i>Falafel · Döner</i></td><td class="pr">~€8</td></tr>
+            <tr><td>נודלס מוקפצים<i>Gebratene Nudeln</i></td><td class="pr">~€10</td></tr>
+            <tr><td>נקניקיית פרייבורג (Lange Rote) בשוק הקתדרלה<i>Lange Rote</i></td><td class="pr">~€4.5</td></tr>
+          </table>
+          <div class="note">* המחירים משוערים. לבדוק במקום. סגור ביום ראשון.</div>
+  </div>
+</dialog>
+
+<dialog class="menu-dlg" id="menu-day14" aria-label="תפריט">
+  <div class="rest">
+    <button class="dlg-x" type="button" aria-label="סגירה">✕</button>
+          <span class="tag">📋 קפה ועוגה</span>
+          <h4>Café Schäfer, טריברג</h4>
+          <p>קונדיטוריה משפחתית ששומרת על המתכון המקורי של עוגת היער השחור (Schwarzwälder Kirschtorte).</p>
+          <table class="menu">
+            <tr><td>פרוסת עוגת היער השחור<i>Schwarzwälder Kirschtorte</i></td><td class="pr">~€5.5</td></tr>
+            <tr><td>שוקו חם / קקאו<i>Heiße Schokolade</i></td><td class="pr">~€4</td></tr>
+            <tr><td>עוגת תפוחים<i>Apfelkuchen</i></td><td class="pr">~€4.5</td></tr>
+          </table>
+          <div class="note">* העוגה המקורית מכילה מעט קירש (ליקר דובדבנים). לילדים אפשר לבקש עוגה אחרת. המחירים משוערים.</div>
+  </div>
+</dialog>
+
+<button class="to-top" id="toTop" aria-label="חזרה לראש הדף" title="חזרה לראש הדף">↑</button>
+
+<footer>
+  נבנה באהבה לטיול המשפחתי שלנו 🌲 · התמונות מ־<a href="https://www.wikipedia.org" target="_blank" rel="noopener">ויקיפדיה</a> ומ־Wikimedia Commons, ברישיונות Creative Commons. מעבר עם העכבר על תמונה מציג קישור לעמוד המקור.<br>
+  מזג האוויר הוא ממוצע היסטורי לאמצע אוגוסט, וכשבועיים לפני הטיול הוא יתחלף בתחזית. זמני הנסיעה, מחירי האטרקציות, תפריטי הילדים ורשימת ההטבות בכרטיס משוערים, וכדאי לבדוק אותם לפני כל יום.
+</footer>
+
+<script>
+/* ---------- trip config: fill in the flight details once they are known ---------- */
+window.TRIP_FLIGHTS = [
+  // airline: IATA code (e.g. "LY"), no: flight number (e.g. "357"), dep/arr: local times "HH:MM"
+  { id: "flt-out",  airline: "", no: "", date: "2027-08-15", dep: "", arr: "", tlvTime: "", dir: "D", label: "המראה מנתב״ג" },
+  { id: "flt-back", airline: "", no: "", date: "2027-08-29", dep: "", arr: "", tlvTime: "", dir: "A", label: "נחיתה בנתב״ג" }
+];
+
+/* ---------- red card catalog (status: inc = included, chk = check / discount only, pay = not in the card) ---------- */
+window.CATALOG = [
+  { n: "רכבל הפלדברג ומגדל התצפית", e: "🚡", st: "inc", t: ["cable","nature"], town: "פלדברג", drive: 25, ll: [47.8606, 8.0256], day: "day8",
+    p: "רכבל לפסגת הזבוק, שעולה ויורד פעם אחת, וכניסה למגדל התצפית עם הנוף לאלפים.", price: "בכרטיס: עלייה וירידה פעם אחת + המגדל", img: "wiki:de:Feldbergturm|wiki:Feldberg (Black Forest)" },
+  { n: "שייט מסביב לאגם טיטיזה", e: "⛴️", st: "inc", t: ["nature"], town: "טיטיזה", drive: 0, ll: [47.9025, 8.1530], day: "day8",
+    p: "שייט של כ־25 דק׳ שיוצא מהטיילת. הרציף ליד המלון.", price: "בכרטיס: פעם אחת", img: "wiki:Titisee|wiki:de:Titisee" },
+  { n: "Steinwasen-Park", e: "🦌", st: "inc", t: ["coaster","park","nature"], town: "אוברריד", drive: 35, ll: [47.8806, 7.9560], day: "day11",
+    p: "שתי מגלשות הרים של כ־800 מ׳, גשר תלוי של 218 מ׳, חיות בר ומתקנים לילדים.", price: "בכרטיס: כניסה אחת (במקום כ־€29)", img: "wiki:de:Steinwasen-Park" },
+  { n: "סירות פדלים באגם שוכזה", e: "🚣", st: "inc", t: ["nature"], town: "שוכזה", drive: 25, ll: [47.8105, 8.1530], day: "day12",
+    p: "השכרת סירות פדלים ליד הסכר, באגם הגדול ביער השחור.", price: "בכרטיס", img: "wiki:Schluchsee|wiki:de:Schluchsee" },
+  { n: "אוטובוסים ורכבות (KONUS)", e: "🚆", st: "inc", t: ["city","rain"], town: "כל האזור", drive: 0, ll: [47.9036, 8.1556], day: "day10",
+    p: "נסיעה חינם בתחבורה הציבורית ביער השחור, כולל הרכבת מטיטיזה לפרייבורג והחשמליות בעיר.", price: "חינם לאורך כל השהייה", img: "wiki:Höllentalbahn (Black Forest)|wiki:de:Höllentalbahn (Schwarzwald)" },
+  { n: "Hasenhorn Coaster, טודנאו", e: "🛷", st: "pay", t: ["coaster","cable"], town: "טודנאו", drive: 40, ll: [47.8231, 7.9442], day: "day9",
+    p: "מגלשת ההרים הארוכה בגרמניה (2.9 ק״מ), עם רכבל כיסאות לפסגה. מגיל 3 עם מבוגר.", price: "נסיעה בערך €11 למבוגר / €8.50 לילד (בקופה בלבד)", img: "wiki:de:Hasenhorn (Schwarzwald)|wiki:Todtnau" },
+  { n: "מפל טודנאו והגשר התלוי", e: "💧", st: "chk", t: ["nature"], town: "טודנאו", drive: 40, ll: [47.8461, 7.9583], day: "day9",
+    p: "מפל של 97 מ׳ וגשר תלוי (blackforestline) של כ־450 מ׳ מעל העמק. מסלול עם מדרגות.", price: "מפל כ־€3. לבעלי כרטיס לפעמים חינם או בהנחה", img: "wiki:de:Todtnauer Wasserfall|wiki:Todtnau" },
+  { n: "רכבל השאואינסלנד", e: "🚡", st: "chk", t: ["cable"], town: "פרייבורג", drive: 50, ll: [47.9353, 7.8650], day: "day10",
+    p: "רכבל הגונדולות הארוך בגרמניה (3.6 ק״מ), עם מגדל תצפית ומגרש משחקים בפסגה.", price: "€15 למבוגר / €10 לילד הלוך־חזור (אם לא כלול)", img: "wiki:Schauinslandbahn|wiki:de:Schauinslandbahn" },
+  { n: "העיר העתיקה של פרייבורג", e: "⛪", st: "pay", t: ["city","rain"], town: "פרייבורג", drive: 40, ll: [47.9955, 7.8522], day: "day10",
+    p: "הקתדרלה, השוק, תעלות הבכלה, אולם השווקים ורכבל הגבעה Schlossbergbahn.", price: "העיר חינם · ברכבת עם הכרטיס", img: "wiki:Freiburg Minster|wiki:Freiburg im Breisgau" },
+  { n: "רכבל הבלכן", e: "🚠", st: "pay", t: ["cable","nature"], town: "אייטרן", drive: 55, ll: [47.8217, 7.8500], day: "day13",
+    p: "גונדולות לפסגה של 1,414 מ׳, עם מסלול מעגלי ונוף לאלפים. לפי מקורות קודמים כלול בכרטיס רק בחורף.", price: "בערך €12 למבוגר / €6 לילד", img: "wiki:Belchen (Black Forest)|wiki:de:Belchen (Schwarzwald)" },
+  { n: "מגדל ההוכפירסט ורכבל ההליכה", e: "🗼", st: "chk", t: ["cable","nature"], town: "נוישטאדט", drive: 15, ll: [47.8933, 8.2006], day: "day8",
+    p: "רכבל כיסאות שפועל בקיץ למטיילים, ומגדל תצפית מעל טיטיזה.", price: "לבדוק אם פועל ואם כלול", img: "wiki:de:Hochfirst|wiki:Titisee-Neustadt" },
+  { n: "ערוץ רוונה", e: "🌲", st: "pay", t: ["nature"], town: "ברייטנאו", drive: 15, ll: [47.9372, 8.0947], day: "day12",
+    p: "מסלול מעגלי של כ־5 ק״מ בערוץ יער, עם מפלים, גשרי עץ וגשר הרכבת הענק.", price: "חינם", img: "wiki:de:Ravennaschlucht|wiki:Ravenna Bridge" },
+  { n: "מפלי טריברג", e: "💦", st: "chk", t: ["nature"], town: "טריברג", drive: 50, ll: [48.1306, 8.2319], day: "day14",
+    p: "המפלים הגבוהים בגרמניה (163 מ׳), עם סנאים שאוכלים מהיד.", price: "כ־€9 למבוגר, ילדים בהנחה", img: "wiki:Triberg Waterfalls|wiki:de:Triberger Wasserfälle" },
+  { n: "מגלשת ההרים בגוטאך (Schwarzwaldbob)", e: "🛷", st: "pay", t: ["coaster"], town: "גוטאך", drive: 60, ll: [48.2295, 8.2026], day: "day14",
+    p: "מגלשת הרים של 1,150 מ׳ עם עיקולים וקפיצות, ליד מוזיאון הכפר הפתוח.", price: "בערך €4.50 לנסיעה", img: "wiki:Black Forest Open Air Museum|wiki:Gutach (Schwarzwaldbahn)" },
+  { n: "מוזיאון הכפר Vogtsbauernhof", e: "🏡", st: "pay", t: ["rain","city"], town: "גוטאך", drive: 60, ll: [48.2275, 8.2006], day: "day14",
+    p: "חוות היער השחור המקוריות, עם בעלי חיים ומלאכות מסורתיות. חלק גדול מהמוזיאון בתוך מבנים.", price: "בערך €13 למבוגר, ילדים בהנחה", img: "wiki:Black Forest Open Air Museum|wiki:de:Schwarzwälder Freilichtmuseum Vogtsbauernhof" },
+  { n: "מכרה הכסף Teufelsgrund", e: "⛏️", st: "chk", t: ["rain"], town: "מינסטרטל", drive: 55, ll: [47.8517, 7.8064], day: "day13",
+    p: "סיור מודרך עם קסדות במנהרות של מכרה ישן. 10° בפנים כל השנה.", price: "בערך €7 למבוגר / €4 לילד", img: "wiki:Münstertal, Baden-Württemberg|wiki:de:Münstertal/Schwarzwald" },
+  { n: "Badeparadies Schwarzwald", e: "🏊", st: "chk", t: ["rain","park"], town: "טיטיזה", drive: 5, ll: [47.9070, 8.1440], day: "day12",
+    p: "בריכה מקורה עם מגלשות ואזור ילדים. מתאימה ליום גשם בלבד, כי כבר היינו ברולנטיקה.", price: "בכרטיס: מחיר מוזל", img: "wiki:de:Badeparadies Schwarzwald|wiki:Titisee" },
+  { n: "Tatzmania, לפינגן", e: "🎠", st: "inc", t: ["park"], town: "לפינגן", drive: 20, ll: [47.8836, 8.3542], day: "day11",
+    p: "פארק חיות ושעשועים קטן לילדים צעירים.", price: "בכרטיס: כניסה אחת", img: "wiki:Löffingen|wiki:de:Löffingen" },
+  { n: "Spass-Park שוכזה", e: "🎈", st: "inc", t: ["park"], town: "שוכזה", drive: 25, ll: [47.8170, 8.1770], day: "day12",
+    p: "פארק משחקים ליד האגם.", price: "בכרטיס", img: "wiki:Schluchsee|wiki:de:Schluchsee (Gemeinde)" }
+];
+
+/* ---------- webcams: link cards ---------- */
+window.CAMS = [
+  { n: "🚡 פסגת הפלדברג", e: "🏔️", when: "ראשון 22.8", href: "https://www.bergfex.com/feldberg/webcams/" },
+  { n: "🌲 אגם טיטיזה", e: "⛴️", when: "כל השבוע", href: "https://www.google.com/search?q=Titisee+webcam+live" },
+  { n: "🛷 האזנהורן, טודנאו", e: "🛷", when: "שני 23.8", href: "https://www.google.com/search?q=Hasenhorn+Todtnau+webcam" },
+  { n: "🚡 פסגת השאואינסלנד", e: "🚡", when: "שלישי 24.8", href: "https://www.google.com/search?q=Schauinsland+Bergstation+webcam" },
+  { n: "🚠 פסגת הבלכן", e: "🚠", when: "שישי 27.8", href: "https://www.google.com/search?q=Belchen+Schwarzwald+webcam" },
+  { n: "💦 מפלי הריין", e: "💦", when: "שבת 21.8", href: "https://www.google.com/search?q=Rheinfall+webcam+live" },
+  { n: "🌷 קונסטנץ ואגם בודן", e: "⛵", when: "שישי–שבת", href: "https://www.google.com/search?q=Konstanz+Hafen+webcam" },
+  { n: "⛪ שטרסבורג", e: "⛪", when: "שני 16.8", href: "https://www.google.com/search?q=Strasbourg+webcam+live+cath%C3%A9drale" }
+];
+</script>
+<script>
+/* ---------- photos (with fallbacks) ---------- */
+(function(){
+  document.querySelectorAll(".ph[data-img]").forEach(function(box){
+    var list = box.getAttribute("data-img").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+    var label = box.getAttribute("data-label");
+    var wide = box.closest(".hero") || box.closest(".day-head");
+    var width = wide ? 1600 : 800;
+
+    var fb = document.createElement("div");
+    fb.className = "ph-fallback";
+    fb.textContent = box.getAttribute("data-fallback") || "🌲";
+    box.appendChild(fb);
+
+    var img = document.createElement("img");
+    img.alt = label || "";
+    img.decoding = "async";
+    box.appendChild(img);
+
+    if (label){
+      var l = document.createElement("div");
+      l.className = "ph-label";
+      l.textContent = label;
+      box.appendChild(l);
+    }
+    img._fail = function(){ box.classList.add("failed"); img.remove(); };
+
+    function start(){
+      fillImg(img, list, width, function(r){
+        img.classList.add("ok");
+        if (!r.page) return;
+        var a = document.createElement("a");
+        a.className = "credit"; a.href = r.page; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = "📷 מקור";
+        box.appendChild(a);
+      });
+    }
+    // load lazily: only when the photo is about to scroll into view
+    if (box.closest(".hero") || !("IntersectionObserver" in window)) start();
+    else {
+      var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ io.disconnect(); start(); } }); }, { rootMargin: "600px" });
+      io.observe(box);
+      box._start = function(){ io.disconnect(); start(); };
+    }
+  });
+})();
+
+/* ---------- red card catalog ---------- */
+(function(){
+  var grid = document.getElementById("catGrid"), bar = document.getElementById("catFilters");
+  var ST = { inc: "🎟️ כלול בכרטיס", chk: "❓ לבדוק / הנחה", pay: "💶 לא בכרטיס" };
+  var DAYS = { day8: "22.8", day9: "23.8", day10: "24.8", day11: "25.8", day12: "26.8", day13: "27.8", day14: "28.8" };
+  function nav(o){ return "https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + o.ll[0] + "," + o.ll[1]; }
+  grid.innerHTML = CATALOG.map(function(o, i){
+    return '<article class="cat" data-i="' + i + '">' +
+      '<div class="ph" data-img="' + o.img + '" data-fallback="' + o.e + '"></div>' +
+      '<div class="cb"><span class="st ' + o.st + '">' + ST[o.st] + '</span>' +
+      '<h3>' + o.e + ' ' + o.n + '</h3><p>' + o.p + '</p><p><b>' + o.price + '</b></p>' +
+      '<div class="meta2"><span>📍 ' + o.town + (o.drive ? ' · 🚗 ' + o.drive + ' דק׳ מטיטיזה' : '') + '</span>' +
+      (o.day ? '<a href="#' + o.day + '">📅 במסלול ב־' + DAYS[o.day] + '</a>' : '') +
+      '<a target="_blank" rel="noopener" href="' + nav(o) + '">🗺️ ניווט</a></div></div></article>';
+  }).join("");
+  // the photos script already ran, so start these photos here
+  grid.querySelectorAll(".ph[data-img]").forEach(function(box){
+    var list = box.getAttribute("data-img").split("|");
+    var fb = document.createElement("div"); fb.className = "ph-fallback"; fb.textContent = box.getAttribute("data-fallback"); box.appendChild(fb);
+    var img = document.createElement("img"); img.alt = ""; img.loading = "lazy"; box.appendChild(img);
+    img._fail = function(){ box.classList.add("failed"); img.remove(); };
+    fillImg(img, list, 600, function(){ img.classList.add("ok"); });
+  });
+  bar.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    bar.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x === b); });
+    var f = b.getAttribute("data-f"), shown = 0;
+    grid.querySelectorAll(".cat").forEach(function(card){
+      var o = CATALOG[+card.getAttribute("data-i")];
+      var ok = f === "all" || (f === "inc" ? o.st === "inc" : o.t.indexOf(f) >= 0);
+      card.hidden = !ok; if (ok) shown++;
+    });
+    var empty = grid.querySelector(".cat-empty");
+    if (!shown && !empty){ empty = document.createElement("p"); empty.className = "cat-empty"; empty.textContent = "אין אטרקציות בסינון הזה"; grid.appendChild(empty); }
+    if (empty) empty.hidden = !!shown;
+  });
+})();
+
+/* ---------- webcams ---------- */
+(function(){
+  document.getElementById("camGrid").innerHTML = CAMS.map(function(c){
+    return '<a class="cam" target="_blank" rel="noopener" href="' + c.href + '"><div class="cam-img"><span class="cam-emoji">' + c.e + '</span><span class="cam-live">● LIVE</span><span class="cam-go">פתח ↗</span></div>' +
+      '<div class="cam-cap"><b>' + c.n + '</b><small>' + c.when + '</small></div></a>';
+  }).join("");
+})();
+
+/* ---------- Waze buttons next to every Google Maps link ---------- */
+document.querySelectorAll('a[href*="google.com/maps/dir/"]').forEach(function(a){
+  var dest = new URL(a.href).searchParams.get("destination");
+  if (!dest) return;
+  var w = document.createElement("a");
+  w.href = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(dest)
+    ? "https://waze.com/ul?ll=" + dest + "&navigate=yes"
+    : "https://waze.com/ul?q=" + encodeURIComponent(dest) + "&navigate=yes";
+  w.target = "_blank"; w.rel = "noopener";
+  w.className = (a.className ? a.className + " " : "") + "waze";
+  w.textContent = "🚙 Waze";
+  a.after(document.createTextNode(" · "), w);
+});
+
+/* ---------- menu popups ---------- */
+document.querySelectorAll(".menu-btn").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var d = document.getElementById(btn.getAttribute("data-menu"));
+    if (d && d.showModal) d.showModal(); else if (d) d.setAttribute("open", "");
+  });
+});
+document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
+  d.querySelector(".dlg-x").addEventListener("click", function(){ d.close(); });
+  d.addEventListener("click", function(e){ if (e.target === d) d.close(); });
+});
+
+/* ---------- share & PDF ---------- */
+(function(){
+  var toastEl = document.getElementById("toast"), tt;
+  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(tt); tt = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600); }
+  function pageUrl(){ return location.href.split("#")[0]; }
+
+  document.getElementById("shareBtn").addEventListener("click", function(){
+    var data = { title: document.title, text: "המסלול שלנו ליער השחור – אלזס, אגם קונסטנץ וטיטיזה 🌲", url: pageUrl() };
+    if (navigator.share){
+      navigator.share(data).catch(function(){});
+      return;
+    }
+    var done = function(){ toast("🔗 הקישור הועתק. אפשר להדביק בוואטסאפ או במייל"); };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(data.url).then(done, function(){ window.open("https://wa.me/?text=" + encodeURIComponent(data.text + " " + data.url), "_blank"); });
+    } else {
+      window.open("https://wa.me/?text=" + encodeURIComponent(data.text + " " + data.url), "_blank");
+    }
+  });
+
+  // Make sure every photo is loaded before printing (lazy images would print blank)
+  function loadAllImages(maxWait){
+    document.querySelectorAll(".ph").forEach(function(b){ if (b._start) b._start(); });
+    return new Promise(function(res){ setTimeout(res, 1200); }).then(function(){
+      var imgs = Array.prototype.slice.call(document.images);
+      imgs.forEach(function(i){ i.loading = "eager"; });
+      var pending = imgs.filter(function(i){ return !i.complete && i.src; }).map(function(i){
+        return new Promise(function(res){ i.addEventListener("load", res, { once: true }); i.addEventListener("error", res, { once: true }); });
+      });
+      return Promise.race([Promise.all(pending), new Promise(function(res){ setTimeout(res, maxWait); })]);
+    });
+  }
+  var pdfBtn = document.getElementById("pdfBtn");
+  pdfBtn.addEventListener("click", function(){
+    pdfBtn.disabled = true; pdfBtn.querySelector(".lb").textContent = "מכין…";
+    loadAllImages(4000).then(function(){
+      pdfBtn.disabled = false; pdfBtn.querySelector(".lb").textContent = "PDF";
+      toast("בחלון ההדפסה בחרו \"שמירה כ־PDF\"");
+      setTimeout(function(){ window.print(); }, 300);
+    });
+  });
+})();
+
+/* ---------- flight check against the Ben Gurion flight board (data.gov.il, Israel Airports Authority) ---------- */
+(function(){
+  function el(f, sel){ return document.querySelector("#" + f.id + " " + sel); }
+  function setSt(f, cls, txt){ var s = el(f, "[data-st]"); s.className = "flt-st " + (cls || ""); s.textContent = txt; }
+  function vals(r){ return Object.keys(r).map(function(k){ return String(r[k] == null ? "" : r[k]).trim(); }); }
+  function dt(r){ // all datetime-looking values in the record, in field order
+    return vals(r).filter(function(v){ return /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(v); });
+  }
+  function daysTo(d){ return Math.ceil((new Date(d + "T00:00:00+03:00") - new Date()) / 86400000); }
+
+  TRIP_FLIGHTS.forEach(function(f){
+    if (f.dep) el(f, "[data-t1]").textContent = f.dep;
+    if (f.arr) el(f, "[data-t2]").textContent = f.arr;
+    if (!f.airline || !f.no){ setSt(f, "", "✏️ להשלים מספר טיסה"); return; }
+    var code = f.airline + f.no;
+    el(f, "[data-fno]").textContent = "✈️ " + code;
+    var url = "https://data.gov.il/api/3/action/datastore_search?resource_id=e83f763b-b7d7-479e-b172-ae981ddc6de5&limit=50&q=" + encodeURIComponent(f.airline + " " + f.no);
+    fetch(url).then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(j){
+      var recs = (j.result && j.result.records) || [];
+      var mine = recs.filter(function(r){ var v = vals(r); return v.indexOf(f.airline) >= 0 && (v.indexOf(f.no) >= 0 || v.indexOf(code) >= 0 || v.indexOf(f.airline + " " + f.no) >= 0); });
+      var onDay = mine.filter(function(r){ return dt(r).some(function(x){ return x.slice(0, 10) === f.date; }); })[0];
+      if (!onDay){
+        var n = daysTo(f.date);
+        if (mine.length) setSt(f, "ok", "✅ הטיסה פעילה בלוח נתב״ג · התאריך שלנו יופיע כמה ימים לפני");
+        else setSt(f, "", n > 0 ? "📅 יופיע בלוח נתב״ג כמה ימים לפני הטיסה" : "לא נמצא בלוח");
+        return;
+      }
+      var times = dt(onDay), sched = times[0] || "", upd = times[1] || sched;
+      var hhS = sched.slice(11, 16), hhU = upd.slice(11, 16);
+      var status = onDay.CHRMINH || onDay.CHRMINE || "";
+      if (/בוטל|CANCEL/i.test(status)) setSt(f, "bad", "❌ " + status);
+      else if (hhS && f.tlvTime && hhS !== f.tlvTime) setSt(f, "warn", "⚠️ " + f.label + " " + hhS + " (במקום " + f.tlvTime + ")");
+      else if (hhU && hhU !== hhS) setSt(f, "warn", "⏱️ " + f.label + " מעודכנת ל־" + hhU + (status ? " · " + status : ""));
+      else setSt(f, "ok", "✅ בלוח נתב״ג בשעה " + (hhS || f.tlvTime) + (status ? " · " + status : ""));
+    }).catch(function(){
+      setSt(f, "", "📅 בדיקה מול נתב״ג לא זמינה כרגע");
+    });
+  });
+})();
+
+/* ---------- parking spot ---------- */
+(function(){
+  var dlg = document.getElementById("parkDlg"), info = document.getElementById("parkInfo"), note = document.getElementById("parkNote");
+  var go = document.getElementById("parkGo"), wz = document.getElementById("parkWaze");
+  function get(){ try { return JSON.parse(localStorage.getItem("bf.parking")); } catch(e){ return null; } }
+  function put(v){ try { v ? localStorage.setItem("bf.parking", JSON.stringify(v)) : localStorage.removeItem("bf.parking"); } catch(e){} }
+  function dist(a, b){ var R = 6371000, t = Math.PI/180, dLa = (b.lat-a.lat)*t, dLo = (b.lon-a.lon)*t;
+    var h = Math.sin(dLa/2)*Math.sin(dLa/2) + Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
+  function fmtDist(m){ return m < 1000 ? Math.round(m) + " מ׳" : (m/1000).toFixed(1) + " ק״מ"; }
+  function render(){
+    var p = get();
+    [go, wz].forEach(function(a){ a.classList.toggle("is-off", !p); });
+    if (!p){ info.textContent = "עוד לא נשמר מיקום. כשמחנים, לוחצים \"שמור\"."; note.value = ""; return; }
+    var d = new Date(p.t);
+    info.innerHTML = "📍 הרכב חונה כאן מ־<b>" + d.toLocaleDateString("he-IL") + " " + ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2) + "</b>" +
+      (p.note ? "<br>📝 " + p.note.replace(/[<>&]/g, "") : "") + '<br><span id="parkDist" class="tool-note">מחשב מרחק…</span>';
+    note.value = p.note || "";
+    go.href = "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + p.lat + "," + p.lon;
+    wz.href = "https://waze.com/ul?ll=" + p.lat + "," + p.lon + "&navigate=yes";
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(function(pos){
+      var el = document.getElementById("parkDist"); if (el) el.textContent = "🚶 במרחק כ־" + fmtDist(dist({lat: pos.coords.latitude, lon: pos.coords.longitude}, p)) + " מכם";
+    }, function(){ var el = document.getElementById("parkDist"); if (el) el.textContent = ""; }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+  }
+  document.getElementById("parkBtn").addEventListener("click", function(){ render(); dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", ""); });
+  document.getElementById("parkSave").addEventListener("click", function(){
+    if (!navigator.geolocation){ info.textContent = "הטלפון לא מאפשר גישה למיקום."; return; }
+    info.textContent = "⏳ מאתר את המיקום…";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      put({ lat: +pos.coords.latitude.toFixed(6), lon: +pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy), t: Date.now(), note: note.value.trim() });
+      render();
+    }, function(err){
+      info.textContent = err.code === 1 ? "צריך לאשר לאתר גישה למיקום, בהגדרות הדפדפן." : "לא הצלחנו לאתר מיקום. נסו שוב בשטח פתוח.";
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  });
+  note.addEventListener("change", function(){ var p = get(); if (p){ p.note = note.value.trim(); put(p); } });
+  document.getElementById("parkClear").addEventListener("click", function(){ put(null); render(); });
+})();
+
+/* ---------- tool dialogs: open / close ---------- */
+(function(){
+  var fuel = document.getElementById("fuelDlg");
+  document.getElementById("fuelBtn").addEventListener("click", function(){ fuel.showModal ? fuel.showModal() : fuel.setAttribute("open", ""); });
+  document.querySelectorAll("dialog.tool-dlg").forEach(function(d){
+    d.querySelector(".dlg-x").addEventListener("click", function(){ d.close(); });
+    d.addEventListener("click", function(e){ if (e.target === d) d.close(); });
+  });
+})();
+
+/* ---------- back to top ---------- */
+(function(){
+  var btn = document.getElementById("toTop");
+  function upd(){ btn.classList.toggle("show", window.scrollY > 600); }
+  window.addEventListener("scroll", upd, { passive: true });
+  btn.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
+  upd();
+})();
+
+/* ---------- sticky nav: scroll-spy ---------- */
+(function(){
+  var nav = document.getElementById("daynav");
+  var wrap = nav.querySelector(".wrap");
+  var links = Array.prototype.slice.call(nav.querySelectorAll("a"));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  var current = null;
+
+  function setActive(idx){
+    if (idx === current) return;
+    current = idx;
+    links.forEach(function(a,i){ a.classList.toggle("active", i === idx); });
+    var a = links[idx];
+    if (a){
+      var left = a.offsetLeft - (wrap.clientWidth - a.offsetWidth) / 2;
+      wrap.scrollTo({ left: left, behavior: "smooth" });
+    }
+  }
+  function onScroll(){
+    var line = nav.getBoundingClientRect().bottom + window.innerHeight * 0.25;
+    var idx = -1;
+    targets.forEach(function(t,i){ if (t && t.getBoundingClientRect().top <= line) idx = i; });
+    if (idx === -1) { links.forEach(function(a){ a.classList.remove("active"); }); current = null; }
+    else setActive(idx);
+    nav.classList.toggle("stuck", nav.getBoundingClientRect().top <= 0);
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(function(){ ticking = false; onScroll(); }); }
+  }, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+})();
+
+/* ---------- costs ---------- */
+(function(){
+  // per person [adult, child 6-15, child 3-5] in EUR (0 = included in the red card or free)
+  var ATTR = {
+    heidel:   { name: "טירת היידלברג ורכבל ההרים",      p: [11, 5.5, 0] },
+    bato:     { name: "שייט Batorama בשטרסבורג",         p: [16, 8.5, 0] },
+    europa:   { name: "פארק אירופה",                     p: [72, 61, 0] },
+    colboat:  { name: "שייט בקולמר",                     p: [7, 3.5, 0] },
+    singes:   { name: "הר הקופים",                        p: [12, 8, 0] },
+    rulan:    { name: "רולנטיקה",                         p: [50, 47, 0] },
+    lindt:    { name: "בית השוקולד של לינדט",             p: [18, 10.5, 0] },
+    mainau:   { name: "אי מיינאו",                        p: [29, 0, 0] },
+    rhein:    { name: "מפלי הריין: תצפית וסירה לסלע",     p: [20, 10, 0] },
+    feld:     { name: "רכבל הפלדברג ומגדל (בכרטיס)",      p: [0, 0, 0] },
+    tboat:    { name: "שייט בטיטיזה (בכרטיס)",            p: [0, 0, 0] },
+    hasen:    { name: "Hasenhorn Coaster (נסיעה אחת)",    p: [11, 8.5, 0] },
+    todfall:  { name: "מפל טודנאו",                       p: [3, 1.5, 0] },
+    schau:    { name: "רכבל השאואינסלנד",                 p: [15, 10, 0] },
+    stein:    { name: "Steinwasen-Park (בכרטיס)",         p: [0, 0, 0] },
+    pedal:    { name: "סירות פדלים בשוכזה (בכרטיס)",      p: [0, 0, 0] },
+    belchen:  { name: "רכבל הבלכן",                       p: [12, 6, 0] },
+    mine:     { name: "מכרה הכסף Teufelsgrund",           p: [7, 4, 0] },
+    triberg:  { name: "מפלי טריברג",                      p: [9, 5, 0] },
+    gutach:   { name: "מגלשת ההרים בגוטאך (2 נסיעות)",    p: [9, 7, 0] }
+  };
+  // lunch / dinner: "rest" = restaurant, "light" = pizza / snack bar, "home" = nothing to pay
+  var MEAL = { rest: [17, 10], light: [10, 7], home: [0, 0] };
+  var DAYS = {
+    1:  { lat: 49.410, lon: 8.715, place: "היידלברג", drive: "~3:00", km: 260, parking: 10, attr: ["heidel"], wx: "☀️ 26°/15°", lunch: "rest", dinner: "light" },
+    2:  { lat: 48.582, lon: 7.751, place: "שטרסבורג", drive: "~1:30", km: 100, parking: 5, attr: ["bato"], wx: "☀️ 26°/15°", lunch: "rest", dinner: "light" },
+    3:  { lat: 48.266, lon: 7.722, place: "רוסט", drive: "~0:30", km: 20, parking: 8, attr: ["europa"], wx: "☀️ 27°/15°", lunch: "rest", dinner: "light" },
+    4:  { lat: 48.079, lon: 7.358, place: "קולמר", drive: "~2:15", km: 125, parking: 8, attr: ["colboat","singes"], wx: "☀️ 27°/14°", lunch: "rest", dinner: "light" },
+    5:  { lat: 48.262, lon: 7.735, place: "רוסט", drive: "~2:30", km: 200, parking: 8, attr: ["rulan"], wx: "☀️ 27°/15°", lunch: "light", dinner: "light" },
+    6:  { lat: 47.703, lon: 9.196, place: "מיינאו", drive: "~3:00", km: 200, parking: 54, attr: ["lindt","mainau"], wx: "🌤️ 25°/14°", lunch: "light", dinner: "rest" },
+    7:  { lat: 47.678, lon: 8.615, place: "מפלי הריין", drive: "~2:45", km: 170, parking: 12, attr: ["rhein"], wx: "🌤️ 25°/14°", lunch: "rest", dinner: "light" },
+    8:  { lat: 47.861, lon: 8.026, place: "פלדברג", drive: "~0:50", km: 40, parking: 5, attr: ["feld","tboat"], wx: "🌤️ 22°/10° · בפסגה 15°", lunch: "rest", dinner: "light" },
+    9:  { lat: 47.823, lon: 7.944, place: "טודנאו", drive: "~1:20", km: 75, parking: 5, attr: ["hasen","todfall"], wx: "🌤️ 23°/11°", lunch: "rest", dinner: "light" },
+    10: { lat: 47.995, lon: 7.852, place: "פרייבורג", drive: "~2:00", km: 95, parking: 14, attr: ["schau"], wx: "☀️ 26°/14°", lunch: "rest", dinner: "light" },
+    11: { lat: 47.881, lon: 7.956, place: "אוברריד", drive: "~1:10", km: 60, parking: 3, attr: ["stein"], wx: "🌤️ 22°/10°", lunch: "rest", dinner: "light" },
+    12: { lat: 47.811, lon: 8.153, place: "שוכזה", drive: "~1:10", km: 60, parking: 6, attr: ["pedal"], wx: "🌤️ 22°/10°", lunch: "rest", dinner: "light" },
+    13: { lat: 47.822, lon: 7.850, place: "בלכן", drive: "~2:30", km: 125, parking: 5, attr: ["belchen","mine"], wx: "🌤️ 21°/11° · בפסגה 15°", lunch: "rest", dinner: "light" },
+    14: { lat: 48.131, lon: 8.232, place: "טריברג", drive: "~3:45", km: 300, parking: 5, attr: ["triberg","gutach"], wx: "🌤️ 23°/12°", lunch: "light", dinner: "light" },
+    15: { lat: 50.037, lon: 8.562, place: "פרנקפורט", drive: "~0:15", km: 10, parking: 0, attr: [], wx: "✈️ 26°/15°", lunch: "home", dinner: "home" }
+  };
+  // fixed costs in ILS, as booked (hotels 3,813 € = 13,045 ₪, car 1,135 € = 3,894 ₪)
+  var FIXED = [
+    ["✈️ טיסות", 10528],
+    ["🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות) <small>€1,000</small>", 3421],
+    ["🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות) <small>€440</small>", 1505],
+    ["🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות) <small>€2,203</small>", 7537],
+    ["✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה) <small>€170</small>", 582],
+    ["🚙 רכב שכור (15 יום) <small>€1,135</small>", 3894]
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function num(id, d){ var v = parseFloat($(id).value); return isNaN(v) || v < 0 ? d : v; }
+  function ils(n){ return "₪" + Math.round(n).toLocaleString("he-IL"); }
+  function eur(n){ return "€" + (Math.round(n * 10) / 10).toLocaleString("he-IL"); }
+
+  /* sunrise / sunset (NOAA formula, computed locally — works offline) */
+  var SUN_DATES = {};
+  for (var i = 1; i <= 15; i++) SUN_DATES[i] = "2027-08-" + (14 + i);
+  function sunTimes(dateStr, lat, lon){
+    var rad = Math.PI / 180, p = dateStr.split("-");
+    var noonUTC = Date.UTC(+p[0], +p[1] - 1, +p[2], 12);
+    var n = noonUTC / 86400000 + 2440587.5 - 2451545.0 + 0.0008;
+    var J = n - lon / 360;
+    var M = (357.5291 + 0.98560028 * J) % 360;
+    var C = 1.9148 * Math.sin(M*rad) + 0.02 * Math.sin(2*M*rad) + 0.0003 * Math.sin(3*M*rad);
+    var L = (M + C + 180 + 102.9372) % 360;
+    var Jt = 2451545.0 + J + 0.0053 * Math.sin(M*rad) - 0.0069 * Math.sin(2*L*rad);
+    var dec = Math.asin(Math.sin(L*rad) * Math.sin(23.4397*rad));
+    var cosw = (Math.sin(-0.833*rad) - Math.sin(lat*rad) * Math.sin(dec)) / (Math.cos(lat*rad) * Math.cos(dec));
+    var w = Math.acos(cosw) / rad;
+    var toDate = function(jd){ return new Date((jd - 2440587.5) * 86400000); };
+    return { rise: toDate(Jt - w / 360), set: toDate(Jt + w / 360) };
+  }
+  function hm(dt){ return dt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Berlin" }); }
+  function sunLine(d, day){
+    var t = sunTimes(SUN_DATES[d], day.lat, day.lon), now = new Date(), extra = "";
+    var mins = Math.round((t.set - t.rise) / 60000);
+    if (now >= t.rise - 6*3600000 && now < t.set){
+      var left = now < t.rise ? t.rise - now : t.set - now, h = Math.floor(left / 3600000), m = Math.round(left % 3600000 / 60000);
+      extra = ' · <em>' + (now < t.rise ? 'זריחה' : 'שקיעה') + ' בעוד ' + (h ? h + ' ש׳ ' : '') + m + ' דק׳</em>';
+    }
+    return '<span class="sun" title="אור יום: ' + Math.floor(mins/60) + ' ש׳ ' + (mins%60) + ' דק׳">🌅 <bdi dir="ltr">' + hm(t.rise) + '</bdi> · 🌇 <bdi dir="ltr">' + hm(t.set) + '</bdi>' + extra + '</span>';
+  }
+
+  function calc(){
+    var a = num("inAdults",2), k = num("inKids",2), s = num("inSmall",1);
+    var rate = num("inRate",3.42), fuel = num("inFuel",1.75), cons = num("inCons",7.5);
+    var perKm = cons / 100 * fuel;
+    var tot = { attr: 0, fuel: 0, park: 0, km: 0, meals: 0 };
+    var attrLines = [];
+
+    Object.keys(DAYS).forEach(function(d){
+      var day = DAYS[d];
+      var at = day.attr.reduce(function(sum, key){
+        var p = ATTR[key].p, c = p[0]*a + p[1]*k + p[2]*s;
+        attrLines.push([ATTR[key].name, c]);
+        return sum + c;
+      }, 0);
+      var f = day.km * perKm;
+      var meals = [day.lunch, day.dinner].reduce(function(sum, m){ return sum + MEAL[m][0]*a + MEAL[m][1]*k; }, 0);
+      tot.attr += at; tot.fuel += f; tot.park += day.parking; tot.km += day.km; tot.meals += meals;
+
+      var el = document.querySelector('.daysum[data-day="'+d+'"]');
+      if (el){
+        var dayEur = at + f + day.parking + meals, dayIls = dayEur * rate;
+        var e = function(x){ return ' title="' + eur(x) + '"'; };
+        el.innerHTML =
+          '<span class="it">🚗 <b><bdi dir="ltr">' + day.drive + '</bdi></b> ש׳ · <b>' + day.km + '</b> ק״מ</span>' +
+          '<span class="it"' + e(at) + '>🎟️ <b>' + ils(at*rate) + '</b></span>' +
+          '<span class="it"' + e(f) + '>⛽ <b>' + ils(f*rate) + '</b></span>' +
+          '<span class="it"' + e(day.parking) + '>🅿️ <b>' + ils(day.parking*rate) + '</b></span>' +
+          '<span class="it"' + e(meals) + '>🍽️ <b>' + ils(meals*rate) + '</b></span>' +
+          '<span class="tot">סה״כ ' + ils(dayIls) + '<small>' + eur(dayEur) + '</small></span>';
+        var head = document.querySelector('#day' + d + ' .day-head');
+        if (head){
+          var wb = head.querySelector('.wx-badge');
+          if (!wb){ wb = document.createElement('div'); wb.className = 'wx-badge'; head.appendChild(wb); }
+          var parts = day.wx.split(' '), ic = parts.shift();
+          wb.innerHTML = '<span class="i">' + ic + '</span><span><b><bdi dir="ltr">' + parts.join(' ') + '</bdi></b><small>' + (day.fc ? 'תחזית' : 'ממוצע היסטורי') + ' · ' + day.place + '</small>' + sunLine(d, day) + '</span>';
+        }
+      }
+    });
+
+    var fixedSum = FIXED.reduce(function(s,r){ return s + r[1]; }, 0);
+    var varIls = (tot.attr + tot.fuel + tot.park + tot.meals) * rate;
+    var grand = fixedSum + varIls;
+
+    var h = '<tr class="group"><td colspan="2">הוצאות קבועות (כבר שולמו / הוזמנו)</td></tr>';
+    FIXED.forEach(function(r){ h += '<tr><td>'+r[0]+'</td><td class="n">'+ils(r[1])+'</td></tr>'; });
+    h += '<tr><td><b>סה״כ קבועות</b></td><td class="n"><b>'+ils(fixedSum)+'</b></td></tr>';
+    h += '<tr class="group"><td colspan="2">הוצאות בשטח (משוער)</td></tr>';
+    h += '<tr><td>🎟️ כניסה לאטרקציות</td><td class="n">'+ils(tot.attr*rate)+' <small>'+eur(tot.attr)+'</small></td></tr>';
+    attrLines.forEach(function(l){ h += '<tr class="sub"><td>'+l[0]+'</td><td class="n">'+(l[1] ? ils(l[1]*rate) : '<small>בכרטיס</small>')+'</td></tr>'; });
+    h += '<tr><td>⛽ דלק <small>(~'+tot.km.toLocaleString("he-IL")+' ק״מ)</small></td><td class="n">'+ils(tot.fuel*rate)+' <small>'+eur(tot.fuel)+'</small></td></tr>';
+    h += '<tr><td>🅿️ חניה וויניטה שוויצרית</td><td class="n">'+ils(tot.park*rate)+' <small>'+eur(tot.park)+'</small></td></tr>';
+    h += '<tr><td>🍽️ ארוחות <small>(צהריים וערב)</small></td><td class="n">'+ils(tot.meals*rate)+' <small>'+eur(tot.meals)+'</small></td></tr>';
+    h += '<tr><td><b>סה״כ בשטח</b></td><td class="n"><b>'+ils(varIls)+'</b></td></tr>';
+    h += '<tr class="grand"><td>סה״כ לטיול</td><td class="n">'+ils(grand)+'</td></tr>';
+    $("costTable").innerHTML = h;
+
+    var people = a + k + s;
+    $("grandTotal").textContent = ils(grand);
+    $("grandSub").textContent = people ? ("כ־" + ils(grand / people) + " לאדם · קבועות " + ils(fixedSum) + " + בשטח " + ils(varIls)) : "";
+    $("statTotal").textContent = ils(grand);
+    $("statKm").textContent = "~" + tot.km.toLocaleString("he-IL");
+  }
+
+  ["inAdults","inKids","inSmall","inRate","inFuel","inCons"].forEach(function(id){
+    $(id).addEventListener("input", function(){ $(id).dataset.touched = "1"; calc(); });
+  });
+  window.TRIP = { DAYS: DAYS, calc: calc, ils: ils, dates: SUN_DATES };
+  calc();
+  /* during the trip, keep the sunrise/sunset countdown fresh */
+  if (new Date() > new Date("2027-08-14T00:00:00+02:00") && new Date() < new Date("2027-08-29T23:59:00+02:00")) setInterval(calc, 60000);
+})();
+
+/* ---------- live data: euro rate, fuel price, weather + ticker ---------- */
+(function(){
+  var TRIP_START = new Date("2027-08-15T10:00:00+02:00");
+  var CONS = { petrol: 7.5, diesel: 6.0 }, DEFAULT_PRICE = { petrol: 1.75, diesel: 1.65 };
+  function fuelType(){ return document.getElementById("inFuelType").value; }
+  var state = { done: false, fuelPrices: {}, rate: null, rateDate: null, fuel: null, wxNow: null };
+
+  function $(id){ return document.getElementById(id); }
+  function getJSON(url){
+    return fetch(url, { cache: "no-store" }).then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function icon(code){
+    if (code === 0) return "☀️";
+    if (code <= 2) return "🌤️";
+    if (code === 3) return "☁️";
+    if (code <= 48) return "🌫️";
+    if (code <= 57) return "🌦️";
+    if (code <= 67) return "🌧️";
+    if (code <= 77) return "🌨️";
+    if (code <= 82) return "🌧️";
+    if (code <= 86) return "🌨️";
+    return "⛈️";
+  }
+  function daysLeft(){ return Math.ceil((TRIP_START - new Date()) / 86400000); }
+
+  /* ticker */
+  function renderTicker(){
+    var n = daysLeft(), items = [], wait = state.done ? 'לא זמין כרגע' : 'טוען…';
+    if (n > 1) items.push('⏳ עוד <b>' + n.toLocaleString("he-IL") + '</b> ימים לטיול!');
+    else if (n === 1) items.push('⏳ <b>מחר</b> טסים! ✈️');
+    else if (n > -15) items.push('🎉 <b>אנחנו בטיול!</b>');
+    else items.push('🌲 הטיול הסתיים, מקווים שנהניתם');
+    if (state.wxNow) items.push(state.wxNow.icon + ' עכשיו בטיטיזה: <b>' + state.wxNow.t + '°</b> · רוח ' + state.wxNow.wind + ' קמ״ש');
+    else items.push('🌤️ מזג אוויר: ' + wait);
+    if (state.rate) items.push('💶 1 € = <b>' + state.rate.toFixed(3) + ' ₪</b>' + (state.rateDate ? ' <small>(שער של ' + dmy(state.rateDate) + ')</small>' : ''));
+    else items.push('💶 שער היורו: ' + wait);
+    if (state.fuel) items.push('⛽ ' + (fuelType() === 'diesel' ? 'דיזל' : 'בנזין') + ' בגרמניה: <b>€' + state.fuel.toFixed(2) + '</b> לליטר' + (state.rate ? ' (≈₪' + (state.fuel * state.rate).toFixed(2) + ')' : ''));
+    else { var fbT = fuelType(), fbP = DEFAULT_PRICE[fbT]; items.push('⛽ ' + (fbT === 'diesel' ? 'דיזל' : 'בנזין') + ' בגרמניה: <b>~€' + fbP.toFixed(2) + '</b> לליטר' + (state.done ? ' (הערכה)' : '') + (state.rate ? ' (≈₪' + (fbP * state.rate).toFixed(2) + ')' : '')); }
+    if (state.updated) items.push('🔄 עודכן ב־<b>' + hhmm(state.updated) + '</b>' + (state.rateLive || state.fuelLive ? '' : ' (מוצגים ערכים שמורים)'));
+    (window.PRICE_DROPS || []).forEach(function(t){ items.push(t); });
+    items.push('🎟️ <b>הכרטיס האדום</b> · 22–28.8 בטיטיזה');
+    TRIP_FLIGHTS.forEach(function(f){
+      var lbl = f.dir === "D" ? '✈️ הלוך · ראשון 15.8 · תל אביב ← פרנקפורט' : '✈️ חזור · ראשון 29.8 · פרנקפורט ← תל אביב';
+      items.push(lbl + (f.no ? ' · <b>' + f.airline + f.no + '</b>' : '') + (f.dep ? ' · ' + f.dep + ' ← ' + f.arr : ''));
+    });
+    var one = items.map(function(t){ return '<span class="item"><span class="live"></span>' + t + '</span>'; }).join("");
+    $("tickerTrack").innerHTML = one + one;
+  }
+
+  function setInput(id, v, digits){
+    var el = $(id);
+    if (el && !el.dataset.touched){ el.value = v.toFixed(digits); }
+  }
+  function note(){
+    var parts = [];
+    parts.push(state.rate ? (state.rateLive ? "💶 שער יורו לייב: " : "💶 שער יורו (שמור מ־" + new Date(state.rateSaved).toLocaleDateString("he-IL") + "): ") + state.rate.toFixed(3) + " ₪" : "💶 שער היורו לא נטען, משתמשים ב־3.42");
+    parts.push(state.fuel ? "⛽ מחיר " + (fuelType() === "diesel" ? "דיזל" : "בנזין") + (state.fuelLive ? " לייב" : " (שמור מ־" + new Date(state.fuelSaved).toLocaleDateString("he-IL") + ")") + " בגרמניה: €" + state.fuel.toFixed(2) : "⛽ מחיר הדלק לא נטען, משתמשים בברירת המחדל");
+    if (state.updated) parts.push("🔄 עודכן ב־" + hhmm(state.updated));
+    $("liveNote").textContent = parts.join(" · ");
+  }
+
+  /* ---- small helpers: last good values survive a failed request ---- */
+  function save(k, v){ try { localStorage.setItem("bf." + k, JSON.stringify({ v: v, t: Date.now() })); } catch(e){} }
+  function load(k){ try { var o = JSON.parse(localStorage.getItem("bf." + k)); return o && o.v != null ? o : null; } catch(e){ return null; } }
+  function hhmm(t){ var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+
+  function applyFuelType(){
+    var t = fuelType();
+    state.fuel = state.fuelPrices[t] || null;
+    var fe = $("inFuel"), ce = $("inCons");
+    if (!fe.dataset.touched) fe.value = (state.fuel || DEFAULT_PRICE[t]).toFixed(2);
+    if (!ce.dataset.touched) ce.value = CONS[t].toFixed(1);
+  }
+  $("inFuelType").addEventListener("change", function(){ applyFuelType(); renderTicker(); note(); if (window.TRIP) window.TRIP.calc(); });
+
+  /* euro rate: several keyless sources, freshest one wins */
+  function getRate(){
+    function src(url, pick){
+      return getJSON(url).then(function(j){ var r = pick(j); return (r && r.v > 2 && r.v < 8) ? r : null; }).catch(function(){ return null; });
+    }
+    function unixDate(u){ return u ? new Date(u * 1000).toISOString().slice(0, 10) : ""; }
+    return Promise.all([
+      src("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
+      src("https://latest.currency-api.pages.dev/v1/currencies/eur.json", function(j){ return { v: j.eur.ils, d: j.date, s: 1 }; }),
+      src("https://open.er-api.com/v6/latest/EUR", function(j){ return { v: j.rates.ILS, d: unixDate(j.time_last_update_unix), s: 2 }; }),
+      src("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=ILS", function(j){ return { v: j.rates.ILS, d: j.date, s: 3 }; }),
+      src("https://api.frankfurter.app/latest?from=EUR&to=ILS", function(j){ return { v: j.rates.ILS, d: j.date, s: 3 }; })
+    ]).then(function(rs){
+      var best = rs.filter(Boolean).sort(function(a, b){ return (b.d || "").localeCompare(a.d || "") || (a.s - b.s); })[0];
+      if (best){ state.rate = best.v; state.rateDate = best.d; state.rateLive = true; save("rate", { v: best.v, d: best.d }); }
+      else { var c = load("rate"); if (c){ state.rate = c.v.v; state.rateDate = c.v.d; state.rateLive = false; state.rateSaved = c.t; } }
+      if (state.rate) setInput("inRate", state.rate, 2);
+    });
+  }
+  function dmy(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ""); return m ? (+m[3]) + "." + (+m[2]) : ""; }
+
+  /* fuel price: OpenVan.camp public API (CC BY 4.0), Germany gasoline/diesel in EUR/liter */
+  function findDE(obj){
+    if (!obj || typeof obj !== "object") return null;
+    if (obj.DE) return obj.DE;
+    if (Array.isArray(obj)) {
+      for (var i = 0; i < obj.length; i++){
+        var o = obj[i];
+        if (o && (o.country_code === "DE" || o.code === "DE" || o.country === "DE" || o.country_name === "Germany")) return o;
+      }
+    }
+    for (var k in obj){ var r = (obj[k] && typeof obj[k] === "object") ? findDE(obj[k]) : null; if (r) return r; }
+    return null;
+  }
+  function price(v){
+    if (typeof v === "number") return v;
+    if (typeof v === "string") return parseFloat(v);
+    if (v && typeof v === "object") return price(v.price != null ? v.price : (v.value != null ? v.value : v.avg));
+    return NaN;
+  }
+  function getFuel(){
+    return getJSON("https://openvan.camp/api/fuel/prices")
+      .then(function(j){
+        var de = findDE(j.data || j);
+        var pr = de && (de.prices || de);
+        var v = pr ? price(pr.gasoline != null ? pr.gasoline : (pr.petrol != null ? pr.petrol : pr.e5)) : NaN;
+        var dz = pr ? price(pr.diesel) : NaN;
+        var got = {};
+        if (v > 0.8 && v < 4) got.petrol = v;
+        if (dz > 0.8 && dz < 4) got.diesel = dz;
+        if (!got.petrol && !got.diesel) throw new Error("no DE price");
+        state.fuelPrices = got; state.fuelLive = true; save("fuel", got);
+      })
+      .catch(function(){
+        var c = load("fuel");
+        if (c){ state.fuelPrices = c.v; state.fuelLive = false; state.fuelSaved = c.t; }
+      })
+      .then(applyFuelType);
+  }
+
+  /* current weather in Titisee: Open-Meteo (no key) */
+  function getWx(){
+    return getJSON("https://api.open-meteo.com/v1/forecast?latitude=47.903&longitude=8.153&current=temperature_2m,weather_code,wind_speed_10m&timezone=Europe%2FBerlin")
+      .then(function(j){
+        state.wxNow = { t: Math.round(j.current.temperature_2m), icon: icon(j.current.weather_code), wind: Math.round(j.current.wind_speed_10m) };
+      })
+      .catch(function(){});
+  }
+
+  /* forecast for each trip day, once that day is within the ~16-day forecast window */
+  function updateForecasts(){
+    var T = window.TRIP;
+    if (!T) return Promise.resolve();
+    return Promise.all(Object.keys(T.DAYS).map(function(d){
+      var day = T.DAYS[d], date = T.dates[d];
+      var ahead = (new Date(date + "T00:00:00+02:00") - new Date()) / 86400000;
+      if (ahead > 15 || ahead < -1) return null;
+      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + day.lat + "&longitude=" + day.lon +
+        "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Europe%2FBerlin&start_date=" + date + "&end_date=" + date;
+      return getJSON(url).then(function(j){
+        var hi = Math.round(j.daily.temperature_2m_max[0]), lo = Math.round(j.daily.temperature_2m_min[0]);
+        var pr = j.daily.precipitation_probability_max[0], ic = icon(j.daily.weather_code[0]);
+        day.wx = ic + " " + hi + "°/" + lo + "°" + (pr != null ? " · " + pr + "%🌧" : ""); day.fc = true;
+      }).catch(function(){});
+    }));
+  }
+
+  /* refresh everything: on every visit, every 30 minutes, and when coming back to the tab */
+  var lastRefresh = 0, busy = false;
+  function refresh(){
+    if (busy) return; busy = true; state.done = false;
+    var ps = [getRate(), getFuel(), getWx()];
+    ps.forEach(function(p){ p.then(function(){ renderTicker(); if (window.TRIP) window.TRIP.calc(); }); });
+    Promise.all(ps).then(function(){
+      state.done = true; state.updated = Date.now(); lastRefresh = Date.now();
+      renderTicker(); note();
+      return updateForecasts();
+    }).then(function(){ if (window.TRIP) window.TRIP.calc(); busy = false; }, function(){ busy = false; });
+  }
+  window.TRIP_TICKER = renderTicker;
+  renderTicker();
+  refresh();
+  setInterval(refresh, 30 * 60 * 1000);
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible" && Date.now() - lastRefresh > 5 * 60 * 1000) refresh();
+  });
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ---------- trip map ---------- */
+(function(){
+  var el = document.getElementById("tripMap");
+  if (!window.L){ el.innerHTML = '<div class="map-fallback">לא הצלחנו לטעון את המפה. בדקו את החיבור לאינטרנט ורעננו.</div>'; return; }
+
+  var HOTELS = [
+    { n: "DiMas Hotel Ettenheim-Rust", ph: "img/hotels/dimas.jpg|wiki:de:Ettenheim|wiki:Ettenheim", d: "אטנהיים · לילות 1–4 (15–19.8)", ll: [48.2585, 7.7905], c: "#d0632f", day: "day1", short: "רוסט" },
+    { n: "Holiday Inn Express Singen", ph: "img/hotels/holiday-inn-singen.jpg|wiki:de:Hohentwiel|wiki:Singen", d: "זינגן · לילות 5–6 (19–21.8)", ll: [47.7600, 8.8400], c: "#2d6fa8", day: "day5", short: "זינגן" },
+    { n: "Maritim TitiseeHotel", ph: "img/hotels/maritim-titisee.jpg|wiki:Titisee", d: "טיטיזה · לילות 7–13 (21–28.8)", ll: [47.9030, 8.1560], c: "#2f8a4f", day: "day7", short: "טיטיזה" },
+    { n: "Zleep Hotel Frankfurt Airport", ph: "img/hotels/zleep-frankfurt.jpg|wiki:Kelsterbach", d: "קלסטרבאך · לילה 14 (28.8)", ll: [50.0560, 8.5370], c: "#8a4fb0", day: "day14", short: "Zleep" }
+  ];
+  var AIRPORT = { n: "שדה התעופה פרנקפורט (FRA)", d: "נחיתה 15.8 · המראה 29.8", ll: [50.0379, 8.5622], day: "day1" };
+  var ATTR = [
+    { n: "טירת היידלברג", ph: "wiki:Heidelberg Castle", e: "🏰", d: "ראשון 15.8", ll: [49.4106, 8.7153], day: "day1" },
+    { n: "שטרסבורג", ph: "wiki:Strasbourg Cathedral", e: "⛪", d: "שני 16.8", ll: [48.5818, 7.7509], day: "day2" },
+    { n: "פארק אירופה", ph: "wiki:Europa-Park", e: "🎢", d: "שלישי 17.8", ll: [48.2660, 7.7220], day: "day3" },
+    { n: "קולמר", ph: "wiki:Colmar", e: "🛶", d: "רביעי 18.8", ll: [48.0740, 7.3580], day: "day4" },
+    { n: "ריקוויר", ph: "wiki:Riquewihr", e: "🍷", d: "רביעי 18.8", ll: [48.1667, 7.2983], day: "day4" },
+    { n: "הר הקופים", ph: "wiki:Montagne des Singes", e: "🐒", d: "רביעי 18.8", ll: [48.2550, 7.3780], day: "day4" },
+    { n: "רולנטיקה", ph: "wiki:de:Rulantica", e: "🌊", d: "חמישי 19.8", ll: [48.2620, 7.7350], day: "day5" },
+    { n: "בית השוקולד של לינדט", ph: "wiki:Lindt Home of Chocolate|wiki:Lindt & Sprüngli", e: "🍫", d: "שישי 20.8", ll: [47.3233, 8.5530], day: "day6" },
+    { n: "אי מיינאו", ph: "wiki:Mainau", e: "🌷", d: "שישי 20.8", ll: [47.7050, 9.1950], day: "day6" },
+    { n: "נמל קונסטנץ", ph: "wiki:Imperia (statue)|wiki:Konstanz", e: "⛵", d: "שבת 21.8", ll: [47.6590, 9.1780], day: "day7" },
+    { n: "מפלי הריין", ph: "wiki:Rhine Falls", e: "💦", d: "שבת 21.8", ll: [47.6779, 8.6153], day: "day7" }
+  ];
+  // red card area: taken from the catalog
+  CATALOG.forEach(function(o){ if (o.day && o.ll && o.e !== "🚆") ATTR.push({ n: o.n, ph: o.img, e: o.e, d: o.st === "inc" ? "🎟️ כלול בכרטיס האדום" : "אזור טיטיזה", ll: o.ll, day: o.day, red: o.st === "inc" }); });
+
+  var map = L.map(el, { scrollWheelZoom: false, zoomControl: true, attributionControl: true });
+  // base map: OpenStreetMap (no API key). If its tiles fail to load, switch to Esri World Street Map (also keyless).
+  var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  var tileErrors = 0, switched = false;
+  osm.on("tileerror", function(){
+    if (switched || ++tileErrors < 4) return;
+    switched = true;
+    map.removeLayer(osm);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors'
+    }).addTo(map);
+  });
+
+  function popup(o){
+    return (o.ph ? lazyImg(o.ph, 400, "pop-img", o.n) : "") + "<b>" + o.n + "</b><span class='pd'>" + o.d + "</span><br><a href='#" + o.day + "'>לפרטי היום ←</a>" +
+      "<br><a target='_blank' rel='noopener' href='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=" + o.ll[0] + "," + o.ll[1] + "'>🗺️ גוגל מפות</a>" +
+      " · <a target='_blank' rel='noopener' href='https://waze.com/ul?ll=" + o.ll[0] + "," + o.ll[1] + "&navigate=yes'>🚙 Waze</a>";
+  }
+
+  // drive route between the stays
+  L.polyline([AIRPORT.ll, [49.4106, 8.7153], HOTELS[0].ll, HOTELS[1].ll, HOTELS[2].ll, HOTELS[3].ll], { color: "#1f6f68", weight: 3, opacity: .8, dashArray: "8 8" }).addTo(map);
+
+  var all = [];
+  ATTR.forEach(function(o){
+    L.marker(o.ll, { icon: L.divIcon({ className: "", html: '<div class="mk-attr"' + (o.red ? ' style="border-color:#c2412d"' : '') + '>' + o.e + lazyImg(o.ph, 120, "", o.n) + '</div>', iconSize: [44,44], iconAnchor: [22,22], popupAnchor: [0,-20] }), zIndexOffset: 0 })
+      .bindPopup(popup(o), { maxWidth: 240 }).bindTooltip(o.n, { direction: "top", offset: [0,-20], className: "mk-tip" }).addTo(map);
+    all.push(o.ll);
+  });
+  HOTELS.forEach(function(o){
+    L.marker(o.ll, { icon: L.divIcon({ className: "", html: '<div class="mk-hotel" style="background:' + o.c + '">🛏️' + lazyImg(o.ph, 120, "", o.n) + '</div>', iconSize: [46,46], iconAnchor: [23,23], popupAnchor: [0,-22] }), zIndexOffset: 1000 })
+      .bindPopup(popup(o), { maxWidth: 240 }).bindTooltip(o.short, { permanent: true, direction: "bottom", offset: [0,22], className: "mk-tip" }).addTo(map);
+    all.push(o.ll);
+  });
+  L.marker(AIRPORT.ll, { icon: L.divIcon({ className: "", html: '<div class="mk-air">✈️</div>', iconSize: [32,32], iconAnchor: [16,16], popupAnchor: [0,-16] }), zIndexOffset: 900 })
+    .bindPopup(popup(AIRPORT)).addTo(map);
+  all.push(AIRPORT.ll);
+
+  map.fitBounds(L.latLngBounds(all), { padding: [28, 28] });
+  hydrateImgs(el);
+  map.on("popupopen", function(e){ hydrateImgs(e.popup.getElement()); });
+  map.on("click", function(){ map.scrollWheelZoom.enable(); });
+  window.addEventListener("resize", function(){ map.invalidateSize(); });
+})();
+
+/* ---------- price tracker: data/prices.json is refreshed every 2 days by a GitHub Action ---------- */
+(function(){
+  var list = document.getElementById("ptList"), sub = document.getElementById("ptSub");
+  if (!list) return;
+  var ORDER = ["flights", "rust", "singen", "titisee", "frankfurt"];
+  var BASE = { flights: ["✈️ טיסות תל אביב ⇄ פרנקפורט", 10528], rust: ["🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות)", 3421],
+    singen: ["🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות)", 1505], titisee: ["🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות)", 7537],
+    frankfurt: ["✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)", 582] };
+  function ils(n){ return "₪" + Math.round(n).toLocaleString("he-IL"); }
+  function dm(d){ var p = d.split("-"); return +p[2] + "." + +p[1]; }
+  function diff(a, b){
+    var x = a - b, pc = b ? Math.round(Math.abs(x) / b * 100) : 0;
+    if (Math.abs(x) < 1) return '<span class="same">ללא שינוי</span>';
+    return '<span class="' + (x > 0 ? 'up' : 'down') + '">' + (x > 0 ? '▲ ' : '▼ ') + ils(Math.abs(x)) + ' (' + pc + '%)</span>';
+  }
+  function spark(h, paid){
+    if (h.length < 2) return '';
+    var vals = h.map(function(e){ return e.p; }).concat([paid]), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rg = mx - mn || 1;
+    var X = function(i){ return 2 + i * 80 / (h.length - 1); }, Y = function(v){ return 25 - (v - mn) / rg * 22; };
+    var pts = h.map(function(e, i){ return X(i).toFixed(1) + "," + Y(e.p).toFixed(1); }).join(" ");
+    var last = h[h.length - 1].p, col = last > paid ? "#c0392b" : last < paid ? "#1e8449" : "#888";
+    return '<svg viewBox="0 0 84 28" aria-hidden="true"><line x1="0" x2="84" y1="' + Y(paid).toFixed(1) + '" y2="' + Y(paid).toFixed(1) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/>' +
+      '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+  function render(data){
+    var items = data && data.items || {}, drops = [], rows = "";
+    ORDER.forEach(function(id){ if (!items[id]) items[id] = { name: BASE[id][0], paid: BASE[id][1], history: [] }; });
+    ORDER.forEach(function(id){
+      var it = items[id]; if (!it) return;
+      var h = it.history || [], last = h[h.length - 1], prev = h[h.length - 2];
+      var link = it.link ? '<a href="' + it.link.replace(/"/g, "&quot;") + '" target="_blank" rel="noopener">בדוק ↗</a>' : '';
+      var nm = '<div class="nm">' + it.name + '<small>שילמנו ' + ils(it.paid) + (last ? ' · נבדק ב־' + dm(last.d) : '') + (it.room ? ' · ' + it.room : '') + (it.fare ? ' · ' + it.fare : '') + (it.via ? ' · מחיר מ־' + it.via : '') + (it.exact === false && !it.fare ? (id === 'flights' ? ' · המחיר הזול ביותר בקו' : ' · מוצג המחיר הזול ביותר') : '') + (it.error && !last ? ' · לא נמצא מחיר בבדיקה האחרונה' : '') + ' ' + link + '</small></div>';
+      if (!last){ rows += '<div class="pt-row">' + nm + '<div class="now same">—</div></div>'; return; }
+      rows += '<div class="pt-row">' + nm + spark(h, it.paid) +
+        '<div class="now">' + ils(last.p) + '<small>' + (prev ? 'מהבדיקה הקודמת: ' + diff(last.p, prev.p) + '<br>' : '') + 'מול מה ששילמנו: ' + diff(last.p, it.paid) + '</small></div></div>';
+      if (last.p < it.paid - 1) drops.push('📉 ' + it.name.replace(/\s*\(.*\)$/, '') + ': <b>' + ils(last.p) + '</b> · זול ב־' + ils(it.paid - last.p) + ' ממה ששילמנו');
+    });
+    list.innerHTML = rows;
+    sub.textContent = data && data.checked
+      ? "המחירים נבדקים אוטומטית כל יומיים ב־Google Flights וב־Google Hotels (ואם שם אין מחיר, דרך Booking.com), ל־2 מבוגרים ו־3 ילדים. בדיקה אחרונה: " + new Date(data.checked).toLocaleString("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) + ". ▼ ירוק = זול יותר, ▲ אדום = יקר יותר."
+      : "המעקב האוטומטי יתחיל אחרי שנחבר את מפתח SerpApi. מאז המחירים ייבדקו כל יומיים.";
+    window.PRICE_DROPS = drops;
+    if (drops.length && window.TRIP_TICKER) window.TRIP_TICKER();
+  }
+  fetch("data/prices.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+    .then(render)
+    .catch(function(){ render(null); });
+})();
+</script>
+</body>
+</html>

@@ -334,8 +334,9 @@ dialog.tool-dlg::backdrop{background:rgba(10,20,22,.55);backdrop-filter:blur(2px
 .cams{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .cam{display:block;text-decoration:none;color:var(--ink);background:var(--surface);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
 .cam-img{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#2c8c7f,#1f4f6f)}
-.cam-img img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .cam-live{position:absolute;top:8px;left:8px;font-size:.66rem;font-weight:700;color:#fff;background:#c2412d;padding:1px 7px;border-radius:99px}
+.cam-live.photo{background:rgba(0,0,0,.5)}
 .cam-off{position:absolute;inset:0;display:none;place-items:center;color:#fff;font-size:.8rem}
 .cam.off .cam-off{display:grid}.cam.off img,.cam.off .cam-live{display:none}
 .cam-cap{padding:8px 10px}
@@ -1704,13 +1705,13 @@ window.CATALOG = [
 ];
 
 /* ---------- webcams: link cards ---------- */
-window.CAMS = [
-  { n: "🚡 פסגת הפלדברג", e: "🏔️", when: "ראשון 22.8", href: "https://www.schwarzwaldportal.com/en/Feldberg-webcam.html" },
-  { n: "🌲 אגם טיטיזה", e: "⛴️", when: "כל השבוע", href: "https://www.schwarzwaldportal.com/en/webcam-titisee.html" },
-  { n: "🛷 האזנהורן, טודנאו", e: "🛷", when: "שני 23.8", href: "https://www.tourispo.com/webcams/attraction/hasenhorn-coaster-in-todtnau.html" },
-  { n: "🚡 פסגת השאואינסלנד", e: "🚡", when: "שלישי 24.8", href: "https://tourispo.de/webcam/schauinsland-hofgrund.htm" },
-  { n: "🚠 פסגת הבלכן", e: "🚠", when: "שישי 27.8", href: "https://tourispo.de/webcam/belchen-im-schwarzwald.htm" },
-  { n: "🌷 קונסטנץ ואגם בודן", e: "⛵", when: "שישי–שבת", href: "https://www.feratel.com/en/webcams/germany/konstanz-bodensee.html" }
+window.CAMS = [ // img = the camera's latest picture (refreshed every few minutes), ph = a regular photo when there is none
+  { n: "🚡 פסגת הפלדברג", e: "🏔️", when: "ראשון 22.8", img: "https://cams.tourispo.com/images/ecu/content/c_webcam/feldberg--seebuck-talstation_n9093-4323-0_l.jpg", href: "https://www.tourispo.de/webcam/feldberg--seebuck-talstation.htm" },
+  { n: "🌲 אגם טיטיזה", e: "⛴️", when: "כל השבוע", img: "https://cams.tourispo.com/images/ecu/content/c_webcam/view-of-lake-titisee_n2213653-72517-0_m.jpg", href: "https://www.tourispo.com/webcam/view-of-lake-titisee.htm" },
+  { n: "🛷 האזנהורן, טודנאו", e: "🛷", when: "שני 23.8", img: "https://cams.tourispo.com/images/ecu/content/c_webcam/hasenhorn-im-suedschwarzwald_n79744-33158-0_m.jpg", href: "https://www.tourispo.com/webcams/attraction/hasenhorn-coaster-in-todtnau.html" },
+  { n: "🚡 פסגת השאואינסלנד", e: "🚡", when: "שלישי 24.8", img: "https://cams.tourispo.com/images/ecu/content/c_webcam/schauinsland-hofgrund_n79780-33230-0_l.jpg", href: "https://www.tourispo.de/webcam/schauinsland-hofgrund.htm" },
+  { n: "🚠 פסגת הבלכן", e: "🚠", when: "שישי 27.8", img: "https://cams.tourispo.com/images/ecu/content/c_webcam/belchen-im-schwarzwald_n79782-24065-0_l.jpg", href: "https://www.tourispo.de/webcam/belchen-im-schwarzwald.htm" },
+  { n: "🌷 קונסטנץ ואגם בודן", e: "⛵", when: "שישי–שבת", ph: "wiki:Imperia (statue)|wiki:Konstanz", href: "https://www.feratel.com/en/webcams/germany/konstanz-bodensee.html" }
 ];
 </script>
 <script>
@@ -1816,10 +1817,18 @@ hydrateImgs();
 
 /* ---------- webcams ---------- */
 (function(){
-  document.getElementById("camGrid").innerHTML = CAMS.map(function(c){
-    return '<a class="cam" target="_blank" rel="noopener" href="' + c.href + '"><div class="cam-img"><span class="cam-emoji">' + c.e + '</span><span class="cam-live">● LIVE</span><span class="cam-go">פתח ↗</span></div>' +
+  var camGrid = document.getElementById("camGrid");
+  function camSrc(c){ return c.img + "?t=" + Math.floor(Date.now() / 600000); } // a new picture every 10 minutes
+  camGrid.innerHTML = CAMS.map(function(c){
+    var pic = c.img ? '<img alt="" loading="lazy" data-cam src="' + camSrc(c) + '" onerror="this.remove()">' : lazyImg(c.ph, 500, "", c.n);
+    return '<a class="cam" target="_blank" rel="noopener" href="' + c.href + '"><div class="cam-img"><span class="cam-emoji">' + c.e + '</span>' + pic +
+      (c.img ? '<span class="cam-live">● LIVE</span>' : '<span class="cam-live photo">📷 תמונה</span>') + '<span class="cam-go">פתח ↗</span></div>' +
       '<div class="cam-cap"><b>' + c.n + '</b><small>' + c.when + '</small></div></a>';
   }).join("");
+  hydrateImgs(camGrid);
+  setInterval(function(){
+    camGrid.querySelectorAll("img[data-cam]").forEach(function(img, i){ img.src = camSrc(CAMS.filter(function(c){ return c.img; })[i]); });
+  }, 600000);
 })();
 
 /* ---------- Waze buttons next to every Google Maps link ---------- */

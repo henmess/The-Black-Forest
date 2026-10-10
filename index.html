@@ -788,8 +788,8 @@ img.img-failed{display:none}
         <li class="key"><time>10:00</time><div class="what"><b>⛪ קתדרלת נוטרדאם של שטרסבורג<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">הכניסה לקתדרלה שטוחה. לתצפית בגג (332 מדרגות) אין מעלית</small><small>הכניסה חינם. בשעה 12:30 מופעלות הדמויות בשעון האסטרונומי (צריך כרטיס למופע, וכדאי להגיע מוקדם) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Cath%C3%A9drale+Notre-Dame+de+Strasbourg">🗺️ גוגל מפות</a></small></div></li>
         <li class="key"><time>11:00</time><div class="what"><b>⛴️ שייט בתעלות עם Batorama<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">מקפלים את העגלה על הסירה</small><small>סיבוב של כשעה ורבע סביב האי הגדול, דרך פטיט פראנס, הגשרים המקורים, הסכרים ורובע האיחוד האירופי. יש אוזניות עם הסבר. כדאי להזמין באתר מראש · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Batorama+Strasbourg+Rohan">🗺️ גוגל מפות</a></small></div></li>
         <li class="food"><time>12:45</time><div class="what"><b>🍕 צהריים: פלאמקוכן (טארט פלמבה) ב־Flam's<button class="menu-btn" type="button" data-menu="menu-day2">📋 תפריט</button></b><small>"פיצה אלזסית" דקה, שהילדים בדרך כלל אוהבים. ברשת יש גם גרסה עם גבינה בלבד ופלאמקוכן מתוק לקינוח · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Flam%27s+Strasbourg+rue+Merci%C3%A8re">🗺️ גוגל מפות</a></small></div></li>
-        <li class="key"><time>14:00</time><div class="what"><b>🏘️ פטיט פראנס והגשרים המקורים (Ponts Couverts)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">שטוח, עם קצת אבני מרצפת</small><small>בתים עם קורות עץ על התעלות. מסכר ווֹבאן (Barrage Vauban) יש תצפית יפה מהגג, בחינם</small></div></li>
-        <li class="drive"><time>15:15</time><div class="what">🚋 חשמלית A או D חזרה לחניון P+R Rotonde (כ־15 דק׳)</div></li>
+        <li class="key"><time>14:00</time><div class="what"><b>🏘️ פטיט פראנס והגשרים המקורים (Ponts Couverts)<span class="pram ok">👶 מתאים לעגלה</span></b><small class="pn">שטוח, עם קצת אבני מרצפת</small><small>בתים עם קורות עץ על התעלות. מסכר ווֹבאן (Barrage Vauban) יש תצפית יפה מהגג, בחינם. מ־Flam's ומהקתדרלה זה כ־15 דק׳ הליכה (כ־1 ק״מ). השייט עובר כאן אבל לא עוצר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Petite+France+Strasbourg">🚶 ניווט ברגל</a></small></div></li>
+        <li class="drive"><time>15:15</time><div class="what">🚋 חשמלית A או D מתחנת Alt Winmärik (כ־5 דק׳ הליכה מפטיט פראנס) חזרה לחניון P+R Rotonde (כ־10 דק׳) · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=Alt+Winm%C3%A4rik+tram+Strasbourg">🚶 לתחנה</a></div></li>
         <li class="drive"><time>15:30</time><div class="what">🚗 מהחניון ישר חזרה למלון (כ־45 דק׳). בדרך עוצרים בסופר באטנהיים</div></li>
       </ol>
       <div>
@@ -1832,8 +1832,8 @@ hydrateImgs();
 
 /* ---------- Waze buttons next to every Google Maps link ---------- */
 document.querySelectorAll('a[href*="google.com/maps/dir/"]').forEach(function(a){
-  var dest = new URL(a.href).searchParams.get("destination");
-  if (!dest) return;
+  var url = new URL(a.href), dest = url.searchParams.get("destination");
+  if (!dest || url.searchParams.get("travelmode") === "walking") return; // Waze is for driving
   var w = document.createElement("a");
   w.href = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(dest)
     ? "https://waze.com/ul?ll=" + dest + "&navigate=yes"

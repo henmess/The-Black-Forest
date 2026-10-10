@@ -21,6 +21,7 @@
 <script>
 /* Photos: "wiki:Title" / "wiki:de:Title" = the lead image of a Wikipedia article (REST API, CORS-enabled),
    "img/..." or "https://..." = our own file. Every photo has a list of candidates and falls back to an emoji. */
+window.CAR_IMG = "wiki:Volkswagen Passat (B9)|wiki:de:VW Passat B9|wiki:Volkswagen Passat";
 window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
 (function(){
   var cache = {};
@@ -567,21 +568,21 @@ img.img-failed{display:none}
     </div>
     <div class="flights">
       <div class="flt" id="flt-out">
-        <div class="flt-top"><span class="flt-no" data-fno>✈️ הלוך</span><span class="flt-st" data-st>⏳ בודק…</span></div>
-        <div class="flt-route"><b><bdi dir="ltr" data-t1>--:--</bdi></b> תל אביב <span class="arr">←</span> פרנקפורט <b><bdi dir="ltr" data-t2>--:--</bdi></b></div>
-        <small>הלוך · ראשון 15.8 · נמל התעופה פרנקפורט (FRA)</small>
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ LY357</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route"><b><bdi dir="ltr" data-t1>06:05</bdi></b> תל אביב <span class="arr">←</span> פרנקפורט <b><bdi dir="ltr" data-t2>09:40</bdi></b></div>
+        <small>הלוך · ראשון 15.8 · אל על</small>
       </div>
       <div class="flt" id="flt-back">
-        <div class="flt-top"><span class="flt-no" data-fno>✈️ חזור</span><span class="flt-st" data-st>⏳ בודק…</span></div>
-        <div class="flt-route"><b><bdi dir="ltr" data-t1>--:--</bdi></b> פרנקפורט <span class="arr">←</span> תל אביב <b><bdi dir="ltr" data-t2>--:--</bdi></b></div>
-        <small>חזור · ראשון 29.8 · נמל התעופה פרנקפורט (FRA)</small>
+        <div class="flt-top"><span class="flt-no" data-fno>✈️ LY358</span><span class="flt-st" data-st>⏳ בודק…</span></div>
+        <div class="flt-route"><b><bdi dir="ltr" data-t1>10:55</bdi></b> פרנקפורט <span class="arr">←</span> תל אביב <b><bdi dir="ltr" data-t2>16:00</bdi></b></div>
+        <small>חזור · ראשון 29.8 · אל על</small>
       </div>
       <div class="flt-links"><a target="_blank" rel="noopener" href="https://www.iaa.gov.il/airports/ben-gurion/flight-board/">לוח הטיסות של נתב״ג ↗</a> · <a target="_blank" rel="noopener" href="https://www.frankfurt-airport.com/en/flights-and-transfer/arrivals.html">לוח ההגעות בפרנקפורט ↗</a></div>
     </div>
     <div class="hero-stats">
       <div class="stat"><b>15</b><span>ימים</span></div>
       <div class="stat"><b>4</b><span>מלונות</span></div>
-      <div class="stat"><b>3</b><span>מדינות</span></div>
+      <div class="stat"><span data-car="lg"></span><b>VW Passat</b><span>סטיישן</span></div>
       <div class="stat"><b id="statKm">~1,850</b><span>ק״מ נסיעה</span></div>
       <div class="stat"><b id="statTotal">—</b><span>עלות כוללת משוערת</span></div>
     </div>
@@ -652,7 +653,7 @@ img.img-failed{display:none}
       <a class="act-btn waze-btn" target="_blank" rel="noopener" href="https://waze.com/ul?q=Tankstelle&amp;navigate=no">🚙 תחנות קרובות ב־Waze</a>
     </div>
     <div class="tool-note">
-      <b>⚠️ לבדוק בחוזה של הרכב אם הוא בנזין או דיזל.</b> בנזין: Super / E10 / Super Plus (בצרפת SP95 / SP98). דיזל: Diesel (בצרפת Gazole), בדרך כלל עם ידית שחורה.
+      <b>⚠️ הפאסאט יכול להיות בנזין או דיזל. בודקים בחוזה ועל מכסה מיכל הדלק.</b> בנזין: Super / E10 / Super Plus (בצרפת SP95 / SP98). דיזל: Diesel (בצרפת Gazole), בדרך כלל עם ידית שחורה.
       <br>💳 בגרמניה מתדלקים ומשלמים בקופה בפנים לפי מספר המשאבה (Säule). בצרפת הדלק בסופרמרקטים (Leclerc, Super U) זול יותר, אבל בחלק מהתחנות האוטומטיות צריך כרטיס אשראי עם PIN. על האוטובאן ובשוויץ הדלק יקר יותר.
     </div>
   </div>
@@ -726,19 +727,19 @@ img.img-failed{display:none}
     <div class="daysum" data-day="1"></div>
     <div class="meta">
       <a class="chip sos" href="#sos-rust">🚨 חירום באזור</a>
-      <span class="chip">🛬 נחיתה · פרנקפורט (FRA)</span>
+      <span class="chip">🛬 נחיתה 09:40 · פרנקפורט (FRA)</span>
       <span class="chip stay-rust">🛏️ DiMas Hotel Ettenheim-Rust</span>
     </div>
     <div class="grid">
       <ol class="timeline">
-        <li class="key"><time>~10:00</time><div class="what"><b>נחיתה בשדה התעופה פרנקפורט (FRA)</b><small>ביקורת דרכונים ואיסוף מזוודות. השעות ביום הזה משוערות, ומתעדכנות לפי שעת הנחיתה</small></div></li>
-        <li><time>11:00</time><div class="what"><b>איסוף הרכב השכור</b><small>מרכז השכרת הרכב (Mietwagenzentrum) בטרמינל. לוודא שיש מושבי בטיחות ובוסטרים, וסט זוהר ומשולש, ולבדוק אם הרכב בנזין או דיזל</small></div></li>
-        <li class="drive"><time>11:30</time><div class="what">🚗 דרומה בכביש A5 להיידלברג (כ־90 ק״מ, כשעה)</div></li>
-        <li class="food"><time>12:45</time><div class="what"><b>🍽️ צהריים בעיר העתיקה ב־Vetter's Alt Heidelberger Brauhaus<button class="menu-btn" type="button" data-menu="menu-day1">📋 תפריט</button></b><small>Steingasse 9, ליד הגשר הישן · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Vetter%27s+Alt+Heidelberger+Brauhaus+Steingasse+9+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
-        <li class="key"><time>14:00</time><div class="what"><b>🏰 טירת היידלברג ברכבל ההרים (Bergbahn)<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הרכבל נגיש. בחצר הטירה יש אבני מרצפת ומדרגות</small><small>עולים ברכבל ההרים מתחנת Kornmarkt לטירה (הכרטיס כולל את הרכבל, את חצר הטירה ואת החבית הענקית). מהמרפסת יש תצפית יפה על העיר ועל הנהר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Bergbahn+Kornmarkt+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
-        <li><time>15:30</time><div class="what"><b>🌉 הגשר הישן (Alte Brücke) ורחוב Hauptstraße</b><small>מטיילים לאורך הנקר. ליד שער הגשר יש פסל קוף מברונזה שכולם מצטלמים איתו. גלידה לדרך</small></div></li>
-        <li class="drive"><time>16:30</time><div class="what">🚗 דרומה בכביש A5 לאטנהיים (כ־170 ק״מ, כשעה ו־40 דק׳)</div></li>
-        <li class="key"><time>18:15</time><div class="what"><b>צ׳ק־אין ב־DiMas Hotel Ettenheim-Rust</b><small>Gutenbergstraße, אטנהיים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=DiMas+Hotel+Ettenheim+Rust+Gutenbergstra%C3%9Fe+Ettenheim">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>09:40</time><div class="what"><b>נחיתה בשדה התעופה פרנקפורט (FRA), טיסה LY357</b><small>ביקורת דרכונים ואיסוף מזוודות</small></div></li>
+        <li><time>10:40</time><div class="what"><b>איסוף הרכב השכור: VW Passat Variant (סטיישן)<span data-car></span></b><small>מרכז השכרת הרכב (Mietwagenzentrum) בטרמינל. לוודא שיש מושבי בטיחות ובוסטרים, וסט זוהר ומשולש, ולבדוק אם הרכב בנזין או דיזל</small></div></li>
+        <li class="drive"><time>11:00</time><div class="what">🚗 דרומה בכביש A5 להיידלברג (כ־90 ק״מ, כשעה)</div></li>
+        <li class="food"><time>12:15</time><div class="what"><b>🍽️ צהריים בעיר העתיקה ב־Vetter's Alt Heidelberger Brauhaus<button class="menu-btn" type="button" data-menu="menu-day1">📋 תפריט</button></b><small>Steingasse 9, ליד הגשר הישן · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Vetter%27s+Alt+Heidelberger+Brauhaus+Steingasse+9+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
+        <li class="key"><time>13:30</time><div class="what"><b>🏰 טירת היידלברג ברכבל ההרים (Bergbahn)<span class="pram part">👶 חלקית לעגלה</span></b><small class="pn">הרכבל נגיש. בחצר הטירה יש אבני מרצפת ומדרגות</small><small>עולים ברכבל ההרים מתחנת Kornmarkt לטירה (הכרטיס כולל את הרכבל, את חצר הטירה ואת החבית הענקית). מהמרפסת יש תצפית יפה על העיר ועל הנהר · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Bergbahn+Kornmarkt+Heidelberg">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>15:00</time><div class="what"><b>🌉 הגשר הישן (Alte Brücke) ורחוב Hauptstraße</b><small>מטיילים לאורך הנקר. ליד שער הגשר יש פסל קוף מברונזה שכולם מצטלמים איתו. גלידה לדרך</small></div></li>
+        <li class="drive"><time>16:00</time><div class="what">🚗 דרומה בכביש A5 לאטנהיים (כ־170 ק״מ, כשעה ו־40 דק׳)</div></li>
+        <li class="key"><time>17:45</time><div class="what"><b>צ׳ק־אין ב־DiMas Hotel Ettenheim-Rust</b><small>Gutenbergstraße, אטנהיים · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=DiMas+Hotel+Ettenheim+Rust+Gutenbergstra%C3%9Fe+Ettenheim">🗺️ גוגל מפות</a></small></div></li>
       </ol>
       <div>
         <div class="gallery">
@@ -1289,18 +1290,19 @@ img.img-failed{display:none}
     <div class="daysum" data-day="15"></div>
     <div class="meta">
       <a class="chip sos" href="#sos-fra">🚨 חירום באזור</a>
-      <span class="chip">🛫 המראה · פרנקפורט (FRA)</span>
+      <span class="chip depart">⏰ יציאה מהמלון 07:30</span>
+      <span class="chip">🛫 המראה 10:55 · פרנקפורט (FRA)</span>
     </div>
     <div class="grid">
       <ol class="timeline">
-        <li class="food"><time dir="ltr">−4:15</time><div class="what"><b>ארוחת בוקר במלון</b><small>השעות כאן הן ביחס לשעת ההמראה. מעדכנים כשיהיו שעות הטיסה</small></div></li>
-        <li class="drive"><time dir="ltr">−3:45</time><div class="what">🚗 יציאה לשדה התעופה (כ־10 דק׳)</div></li>
-        <li class="key"><time dir="ltr">−3:30</time><div class="what"><b>🚗 החזרת הרכב השכור</b><small>בחניון החזרת הרכבים (Mietwagenrückgabe) של הטרמינל שממנו יוצאת הטיסה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Mietwagenr%C3%BCckgabe+Flughafen+Frankfurt">🗺️ גוגל מפות</a></small></div></li>
-        <li><time dir="ltr">−3:00</time><div class="what"><b>צ׳ק־אין ובידוק ביטחוני</b><small>בטיסות לישראל מגיעים לפחות שלוש שעות לפני ההמראה</small></div></li>
-        <li class="key"><time>🛫</time><div class="what"><b>המראה הביתה</b><small>להתראות, יער שחור!</small></div></li>
+        <li class="food"><time>06:45</time><div class="what"><b>ארוחת בוקר במלון</b><small>או ארוחת בוקר ארוזה</small></div></li>
+        <li class="drive"><time>07:30</time><div class="what">🚗 יציאה לשדה התעופה (כ־10 דק׳)</div></li>
+        <li class="key"><time>07:45</time><div class="what"><b>🚗 החזרת הרכב השכור</b><small>בחניון החזרת הרכבים (Mietwagenrückgabe) של הטרמינל שממנו יוצאת הטיסה · <a class="nav" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=Mietwagenr%C3%BCckgabe+Flughafen+Frankfurt">🗺️ גוגל מפות</a></small></div></li>
+        <li><time>08:00</time><div class="what"><b>צ׳ק־אין ובידוק ביטחוני באל על</b><small>בטיסות לישראל מגיעים לפחות שלוש שעות לפני ההמראה</small></div></li>
+        <li class="key"><time>10:55</time><div class="what"><b>🛫 המראה הביתה, טיסה LY358</b><small>נחיתה בתל אביב בסביבות 16:00. להתראות, יער שחור!</small></div></li>
       </ol>
       <div>
-        <div class="tip"><b>💡 טיפ:</b> בשדה התעופה בפרנקפורט יש שני טרמינלים רחוקים זה מזה. לבדוק מראש מאיזה טרמינל יוצאת הטיסה, ולהחזיר את הרכב בחניון של אותו טרמינל.</div>
+        <div class="tip"><b>💡 טיפ:</b> בשדה התעופה בפרנקפורט יש שני טרמינלים רחוקים זה מזה. אל על יוצאת בדרך כלל מטרמינל 1, אבל כדאי לבדוק באפליקציה יום לפני, ולהחזיר את הרכב בחניון של אותו טרמינל. אם רוצים בוקר רגוע יותר, אפשר להחזיר את הרכב כבר בערב שבת ולהגיע לטרמינל בשאטל של המלון.</div>
       </div>
     </div>
   </div>
@@ -1375,9 +1377,9 @@ img.img-failed{display:none}
         <label>ילדים 6–15<input type="number" id="inKids" min="0" max="10" value="2"></label>
         <label>ילדים 3–5 (לא נספרים בארוחות)<input type="number" id="inSmall" min="0" max="10" value="1"></label>
         <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.42"></label>
-        <label><span>סוג הדלק ברכב השכור</span><select id="inFuelType"><option value="petrol" selected>בנזין</option><option value="diesel">דיזל</option></select></label>
-        <label>מחיר דלק לליטר (€)<input type="number" id="inFuel" min="0.5" max="5" step="0.01" value="1.75"></label>
-        <label>צריכה (ל׳/100 ק״מ)<input type="number" id="inCons" min="3" max="20" step="0.1" value="7.5"></label>
+        <label><span>הרכב: VW Passat Variant<span data-car="sm"></span></span><select id="inFuelType"><option value="petrol">בנזין (1.5 eTSI)</option><option value="diesel" selected>דיזל (2.0 TDI)</option></select></label>
+        <label>מחיר דלק לליטר (€)<input type="number" id="inFuel" min="0.5" max="5" step="0.01" value="1.65"></label>
+        <label>צריכת הפאסאט (ל׳/100 ק״מ)<input type="number" id="inCons" min="3" max="20" step="0.1" value="6.0"></label>
       </div>
       <div class="live-note" id="liveNote">⏳ טוען שער יורו ומחיר דלק עדכניים…</div>
       <div class="big-total"><span>סה״כ לטיול (משוער)</span><b id="grandTotal">—</b><span id="grandSub"></span></div>
@@ -1392,7 +1394,7 @@ img.img-failed{display:none}
           <li>בתשלום: Hasenhorn Coaster (נסיעה אחת, כ־€11 / €8.50) · שאואינסלנד (€15 / €10, אם לא כלול) · בלכן (כ־€12 / €6) · טריברג (€9 / €5) · גוטאך (שתי נסיעות, כ־€9 / €7)</li>
           <li>חניה ואגרות: כולל ויניטה שוויצרית (40 פרנק, כ־€43) ביום 6</li>
           <li>ארוחות: צהריים במסעדה (כ־€17 למבוגר, כ־€10 לילד) וערב קל (כ־€10 / €7). הילד בגיל 3–5 לא נספר. ארוחות הבוקר במלונות לא נכללות</li>
-          <li>דלק: רכב משפחתי, כ־7.5 ל׳/100 ק״מ בבנזין או 6 ל׳/100 ק״מ בדיזל. הקניות בסופר והמזכרות לא נכללות</li>
+          <li>דלק: VW Passat Variant, וברירת המחדל היא דיזל. בדיזל כ־6 ל׳/100 ק״מ ובבנזין כ־7.2 ל׳/100 ק״מ. זו צריכה בפועל עם משפחה מלאה, מזוודות ונסיעה בהרים. הקניות בסופר והמזכרות לא נכללות</li>
         </ul>
       </div>
     </div>
@@ -1667,8 +1669,8 @@ img.img-failed{display:none}
 /* ---------- trip config: fill in the flight details once they are known ---------- */
 window.TRIP_FLIGHTS = [
   // airline: IATA code (e.g. "LY"), no: flight number (e.g. "357"), dep/arr: local times "HH:MM"
-  { id: "flt-out",  airline: "", no: "", date: "2027-08-15", dep: "", arr: "", tlvTime: "", dir: "D", label: "המראה מנתב״ג" },
-  { id: "flt-back", airline: "", no: "", date: "2027-08-29", dep: "", arr: "", tlvTime: "", dir: "A", label: "נחיתה בנתב״ג" }
+  { id: "flt-out",  airline: "LY", no: "357", date: "2027-08-15", dep: "06:05", arr: "09:40", tlvTime: "06:05", dir: "D", label: "המראה מנתב״ג" },
+  { id: "flt-back", airline: "LY", no: "358", date: "2027-08-29", dep: "10:55", arr: "16:00", tlvTime: "16:00", dir: "A", label: "נחיתה בנתב״ג" }
 ];
 
 /* ---------- red card catalog (status: inc = included, chk = check / discount only, pay = not in the card) ---------- */
@@ -1771,6 +1773,13 @@ window.CAMS = [
     }
   });
 })();
+
+/* ---------- car thumbnails ---------- */
+document.querySelectorAll("[data-car]").forEach(function(el){
+  var size = el.getAttribute("data-car");
+  el.outerHTML = lazyImg(CAR_IMG, size === "lg" ? 240 : 120, "car-thumb" + (size ? " " + size : ""), "VW Passat");
+});
+hydrateImgs();
 
 /* ---------- red card catalog ---------- */
 (function(){
@@ -2064,12 +2073,12 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
   };
   // fixed costs in ILS, as booked (hotels 3,813 € = 13,045 ₪, car 1,135 € = 3,894 ₪)
   var FIXED = [
-    ["✈️ טיסות", 10528],
+    ["✈️ טיסות אל על LY357 / LY358", 10528],
     ["🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות) <small>€1,000</small>", 3421],
     ["🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות) <small>€440</small>", 1505],
     ["🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות) <small>€2,203</small>", 7537],
     ["✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה) <small>€170</small>", 582],
-    ["🚙 רכב שכור (15 יום) <small>€1,135</small>", 3894]
+    ["🚙 <bdi>VW Passat Variant</bdi> שכור (15 יום) <small>€1,135</small>" + lazyImg(CAR_IMG, 120, "car-thumb sm", "VW Passat"), 3894]
   ];
 
   function $(id){ return document.getElementById(id); }
@@ -2108,7 +2117,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
 
   function calc(){
     var a = num("inAdults",2), k = num("inKids",2), s = num("inSmall",1);
-    var rate = num("inRate",3.42), fuel = num("inFuel",1.75), cons = num("inCons",7.5);
+    var rate = num("inRate",3.42), fuel = num("inFuel",1.65), cons = num("inCons",6.0);
     var perKm = cons / 100 * fuel;
     var tot = { attr: 0, fuel: 0, park: 0, km: 0, meals: 0 };
     var attrLines = [];
@@ -2161,6 +2170,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     h += '<tr><td><b>סה״כ בשטח</b></td><td class="n"><b>'+ils(varIls)+'</b></td></tr>';
     h += '<tr class="grand"><td>סה״כ לטיול</td><td class="n">'+ils(grand)+'</td></tr>';
     $("costTable").innerHTML = h;
+    hydrateImgs($("costTable"));
 
     var people = a + k + s;
     $("grandTotal").textContent = ils(grand);
@@ -2180,8 +2190,8 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
 
 /* ---------- live data: euro rate, fuel price, weather + ticker ---------- */
 (function(){
-  var TRIP_START = new Date("2027-08-15T10:00:00+02:00");
-  var CONS = { petrol: 7.5, diesel: 6.0 }, DEFAULT_PRICE = { petrol: 1.75, diesel: 1.65 };
+  var TRIP_START = new Date("2027-08-15T09:40:00+02:00");
+  var CONS = { petrol: 7.2, diesel: 6.0 }, DEFAULT_PRICE = { petrol: 1.75, diesel: 1.65 };
   function fuelType(){ return document.getElementById("inFuelType").value; }
   var state = { done: false, fuelPrices: {}, rate: null, rateDate: null, fuel: null, wxNow: null };
 
@@ -2219,12 +2229,14 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     if (state.updated) items.push('🔄 עודכן ב־<b>' + hhmm(state.updated) + '</b>' + (state.rateLive || state.fuelLive ? '' : ' (מוצגים ערכים שמורים)'));
     (window.PRICE_DROPS || []).forEach(function(t){ items.push(t); });
     items.push('🎟️ <b>הכרטיס האדום</b> · 22–28.8 בטיטיזה');
+    items.push('הרכב שלנו: <b>VW Passat</b> סטיישן' + lazyImg(CAR_IMG, 120, 'car-thumb sm', 'VW Passat'));
     TRIP_FLIGHTS.forEach(function(f){
       var lbl = f.dir === "D" ? '✈️ הלוך · ראשון 15.8 · תל אביב ← פרנקפורט' : '✈️ חזור · ראשון 29.8 · פרנקפורט ← תל אביב';
       items.push(lbl + (f.no ? ' · <b>' + f.airline + f.no + '</b>' : '') + (f.dep ? ' · ' + f.dep + ' ← ' + f.arr : ''));
     });
     var one = items.map(function(t){ return '<span class="item"><span class="live"></span>' + t + '</span>'; }).join("");
     $("tickerTrack").innerHTML = one + one;
+    hydrateImgs($("tickerTrack"));
   }
 
   function setInput(id, v, digits){
@@ -2444,7 +2456,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
   var list = document.getElementById("ptList"), sub = document.getElementById("ptSub");
   if (!list) return;
   var ORDER = ["flights", "rust", "singen", "titisee", "frankfurt"];
-  var BASE = { flights: ["✈️ טיסות תל אביב ⇄ פרנקפורט", 10528], rust: ["🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות)", 3421],
+  var BASE = { flights: ["✈️ טיסות אל על LY357 / LY358", 10528], rust: ["🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות)", 3421],
     singen: ["🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות)", 1505], titisee: ["🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות)", 7537],
     frankfurt: ["✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)", 582] };
   function ils(n){ return "₪" + Math.round(n).toLocaleString("he-IL"); }

@@ -7,10 +7,9 @@ const KEY = process.env.SERPAPI_KEY;
 const FILE = new URL("../data/prices.json", import.meta.url);
 const PARTY = { adults: 2, children: 3, ages: "3,7,10" };
 
-// Flight numbers are not known yet: fill in airline / flight / back (e.g. "LY", "LY 357", "LY 358") once booked.
 const ITEMS = [
-  { id: "flights", kind: "flight", name: "✈️ טיסות תל אביב ⇄ פרנקפורט", paid: 10528,
-    params: { departure_id: "TLV", arrival_id: "FRA", outbound_date: "2027-08-15", return_date: "2027-08-29", airline: "", flight: "", back: "" } },
+  { id: "flights", kind: "flight", name: "✈️ טיסות אל על LY357 / LY358", paid: 10528,
+    params: { departure_id: "TLV", arrival_id: "FRA", outbound_date: "2027-08-15", return_date: "2027-08-29", airline: "LY", flight: "LY 357", back: "LY 358" } },
   { id: "rust", kind: "hotel", name: "🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות)", paid: 3421,
     params: { q: "DiMas Hotel Ettenheim Rust", check_in_date: "2027-08-15", check_out_date: "2027-08-19", match: ["dimas"], room: /famil/i, family: true } },
   { id: "singen", kind: "hotel", name: "🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות)", paid: 1505,
@@ -33,8 +32,8 @@ async function serp(params) {
 const norm = x => (x || "").replace(/\s/g, "").toUpperCase();
 const hasFlight = (o, fn) => (o.flights || []).some(f => norm(f.flight_number) === norm(fn));
 
-// Until the flight numbers are filled in, this tracks the cheapest round trip on the route
-// (of the given airline, if set) for the whole party.
+// Google shows El Al's own price for the cheapest fare for the whole party. If our flight
+// is not listed, this falls back to the cheapest round trip of the airline on the route.
 async function flightPrice(p) {
   const j = await serp({ engine: "google_flights", type: 1, departure_id: p.departure_id, arrival_id: p.arrival_id,
     outbound_date: p.outbound_date, return_date: p.return_date, adults: PARTY.adults, children: PARTY.children,
@@ -43,7 +42,7 @@ async function flightPrice(p) {
   const ours = p.flight ? all.find(o => hasFlight(o, p.flight)) : null;
   const pick = ours || all.filter(o => o.price).sort((a, b) => a.price - b.price)[0];
   if (!pick || !pick.price) throw new Error("no flight price in results");
-  return { price: pick.price, exact: !!ours, fare: ours ? "המחיר לטיסה שלנו לכל 5 הנוסעים" : "המחיר הזול ביותר בקו לכל 5 הנוסעים", link: j.search_metadata?.google_flights_url };
+  return { price: pick.price, exact: !!ours, fare: ours ? "המחיר באתר אל על לתעריף הזול לכל 5 הנוסעים" : "המחיר הזול של אל על בקו לכל 5 הנוסעים", link: j.search_metadata?.google_flights_url };
 }
 
 // Fallback for hotels Google shows without a price: Xotelo via RapidAPI (rates from Booking.com & co.).

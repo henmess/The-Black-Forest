@@ -31,8 +31,19 @@ window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
     if (!m) return null;
     return { lang: m[1] || "en", title: m[2].trim() };
   }
+  // Wikimedia only serves thumbnails at these widths; any other width fails to load
+  var WM_WIDTHS = [120, 250, 330, 500, 960, 1280, 1920];
+  function wmWidth(w){ for (var i = 0; i < WM_WIDTHS.length; i++) if (WM_WIDTHS[i] >= w) return WM_WIDTHS[i]; return 1920; }
+  function summary(url, tries){ // retry when Wikipedia says "too many requests"
+    return fetch(url).then(function(r){
+      if (r.status === 429 && tries > 0) return new Promise(function(ok){ setTimeout(ok, 1500 + Math.random() * 2000); }).then(function(){ return summary(url, tries - 1); });
+      if (!r.ok) throw 0;
+      return r.json();
+    });
+  }
   window.resolveImg = function(name, w){
     if (isOwnImg(name)) return Promise.resolve({ src: name });
+    w = wmWidth(w);
     if (/^commons:/.test(name)){ // a Wikimedia Commons file by name
       var f = encodeURIComponent(name.slice(8).trim().replace(/ /g, "_"));
       return Promise.resolve({ src: "https://commons.wikimedia.org/wiki/Special:FilePath/" + f + "?width=" + w, page: "https://commons.wikimedia.org/wiki/File:" + f });
@@ -40,8 +51,7 @@ window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
     var wk = wiki(name);
     if (!wk) return Promise.reject();
     var key = wk.lang + ":" + wk.title;
-    if (!cache[key]) cache[key] = fetch("https://" + wk.lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(wk.title.replace(/ /g, "_")))
-      .then(function(r){ if (!r.ok) throw 0; return r.json(); });
+    if (!cache[key]) cache[key] = summary("https://" + wk.lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(wk.title.replace(/ /g, "_")), 2);
     return cache[key].then(function(j){
       var o = j.originalimage, t = j.thumbnail;
       if (!o && !t) throw 0;
@@ -124,12 +134,12 @@ img{display:block;max-width:100%}
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff}
 .hero .ph{position:absolute;inset:0}
-.hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 45%,rgba(8,25,28,.72) 100%)}
+.hero .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,.22) 45%,rgba(8,25,28,.75) 100%)}
 .hero-inner{position:relative;z-index:2;width:100%;max-width:100%;max-width:1100px;margin:0 auto;padding:0 20px 56px;text-align:center;display:flex;flex-direction:column;align-items:center}
 .kicker{display:inline-block;line-height:1.55;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:99px;font-size:.9rem;letter-spacing:.02em}
 .hero h1{font-size:clamp(2.1rem,6vw,4.4rem);line-height:1.05;margin:16px 0 10px;font-weight:800;text-shadow:0 4px 30px rgba(0,0,0,.35)}
 .hero h1 .sub{display:block;font-size:.5em;font-weight:500;margin-top:8px;opacity:.95}
-.hero p.lead{font-size:clamp(1.05rem,2.2vw,1.35rem);max-width:640px;margin:0 0 22px;opacity:.95}
+.hero p.lead{font-size:clamp(1.05rem,2.2vw,1.35rem);max-width:640px;margin:0 0 22px;opacity:.95;text-shadow:0 2px 12px rgba(0,0,0,.55)}
 .hero-stats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .stat{background:rgba(255,255,255,.14);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 16px;min-width:120px}
 .stat b{display:block;font-size:1.5rem;line-height:1.1}
@@ -281,8 +291,6 @@ dialog.menu-dlg .rest{margin:0;position:relative;padding:18px 18px 14px;box-shad
 .dlg-x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:var(--ink);font-size:.95rem;cursor:pointer}
 .dlg-x:hover{background:rgba(0,0,0,.16)}
 
-.open-tbl th{font-size:.82rem;color:var(--muted);font-weight:500}
-.open-tbl td:nth-child(2){white-space:nowrap;color:var(--muted);font-size:.86rem}
 /* emergency */
 .sos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .sos-card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;border-top:5px solid #c2412d;scroll-margin-top:110px}
@@ -479,7 +487,7 @@ footer a{color:var(--muted)}
   :root{--bg:#fff;--surface:#fff;--ink:#1d2a2e;--muted:#5d6b6f;--line:#ddd;--shadow:none}
   html{scroll-behavior:auto}
   body{background:#fff;font-size:11pt}
-  nav.days,.actions,.to-top,#cams,dialog.tool-dlg,.toast,.menu-btn,.map-card,.gallery,.ph a.credit,#open .sec-sub,.inputs,.live-note,a.waze,.chip.sos,#overview > .sec-sub{display:none !important}
+  nav.days,.actions,.to-top,#cams,dialog.tool-dlg,.toast,.menu-btn,.map-card,.gallery,.ph a.credit,.inputs,.live-note,a.waze,.chip.sos,#overview > .sec-sub{display:none !important}
   .print-only{display:block}
   .hero{min-height:0;height:62mm;margin-bottom:6mm;border-radius:0}
   .hero-inner{padding-bottom:6mm}
@@ -491,7 +499,7 @@ footer a{color:var(--muted)}
   .route{grid-template-columns:repeat(4,1fr);gap:8px}
   .stay .ph{height:28mm}
   .day{box-shadow:none;border:1px solid #ccc;border-radius:12px;margin-top:0;break-inside:auto;break-before:page}
-  #open,#costs,#sos{break-before:page}
+  #costs,#sos{break-before:page}
   .day-head{height:38mm;break-after:avoid}
   .day-title{padding:8px 14px}
   .day-title h3{font-size:15pt}
@@ -561,7 +569,7 @@ img.img-failed{display:none}
 <body>
 
 <header class="hero">
-  <div class="ph" data-img="img/hero.jpg|wiki:Matterhorn|wiki:Eiger|wiki:Jungfrau|wiki:Lauterbrunnen|wiki:Grindelwald|wiki:Zugspitze|wiki:Alps" data-min="1400" data-fallback="🏔️"></div>
+  <div class="ph" data-img="img/hero.jpg|commons:Seealpsee and Seeköpfle.jpg|commons:Seealpsee Juni2018 08.jpg|commons:Seealpsee Juni2018 05.jpg" data-min="1400" data-fallback="🏔️"></div>
   <div class="hero-inner">
     <span class="kicker">🇩🇪🇫🇷🇨🇭 ראשון 15.8 – ראשון 29.8 · <b>היער השחור</b><br><b>גרמניה, צרפת ושוויץ</b></span>
     <h1>הטיול שלנו ליער השחור<br><span class="sub">היידלברג · רוסט · אלזס · אגם קונסטנץ · טיטיזה</span></h1>
@@ -615,7 +623,6 @@ img.img-failed{display:none}
     <a href="#day15">ראשון <small>29.8</small></a>
     <a href="#catalog">🎟️ הכרטיס האדום</a>
     <a href="#cams">📷 מצלמות</a>
-    <a href="#open">✅ פתוח?</a>
     <a href="#costs">💰 עלויות</a>
     <a href="#prices">📉 מחירים</a>
     <a href="#sos">🚨 חירום</a>
@@ -1343,31 +1350,6 @@ img.img-failed{display:none}
   <div class="cams" id="camGrid"></div>
 </section>
 
-<section id="open">
-  <h2 class="sec">✅ פתוח בתאריכים שלנו?</h2>
-  <p class="sec-sub">אוגוסט הוא שיא העונה, ולכן כמעט הכול פתוח כל יום. בדקנו לפי לוחות הזמנים של 2026, כי של 2027 עוד לא פורסמו. כשבוע לפני הטיול כדאי לבדוק שוב באתרים הרשמיים.</p>
-  <div class="panel">
-    <table class="costs open-tbl">
-      <tr><th>אטרקציה</th><th>יום</th><th>סטטוס</th></tr>
-      <tr><td>🏰 טירת היידלברג ורכבל ההרים</td><td>א׳ 15.8</td><td>✅ כל יום, בערך 9:00–18:00</td></tr>
-      <tr><td>⛪ קתדרלת שטרסבורג ו־Batorama</td><td>ב׳ 16.8</td><td>✅ כל יום. 15.8 הוא חג בצרפת, אבל אנחנו מגיעים ב־16.8. את השייט כדאי להזמין מראש</td></tr>
-      <tr><td>🎢 פארק אירופה</td><td>ג׳ 17.8</td><td>✅ פתוח כל יום בעונת הקיץ, בדרך כלל 9:00–18:00 (בחלק מהימים עד מאוחר יותר)</td></tr>
-      <tr><td>🛶 קולמר והר הקופים</td><td>ד׳ 18.8</td><td>✅ השייט כל יום. הר הקופים פתוח באוגוסט כל יום, בערך 10:00–18:00</td></tr>
-      <tr><td>🌊 רולנטיקה</td><td>ה׳ 19.8</td><td>✅ כל יום 9:30–22:00. ⚠️ בקיץ הכרטיסים נגמרים, ולכן מזמינים מראש</td></tr>
-      <tr><td>🍫 בית השוקולד של לינדט</td><td>ו׳ 20.8</td><td>✅ כל יום 10:00–19:00. צריך להזמין כרטיס לשעה מסוימת</td></tr>
-      <tr><td>🌷 אי מיינאו</td><td>ו׳ 20.8</td><td>✅ כל יום, בקיץ עד הערב</td></tr>
-      <tr><td>💦 מפלי הריין והסירות לסלע</td><td>שבת 21.8</td><td>✅ כל יום. הסירות פועלות לפי גובה המים</td></tr>
-      <tr><td>🚡 רכבל הפלדברג</td><td>א׳ 22.8</td><td>✅ פועל כל יום בקיץ</td></tr>
-      <tr><td>🛷 Hasenhorn Coaster</td><td>ב׳ 23.8</td><td>✅ כל יום 10:00–16:30. נסגר בגשם חזק, ברוח חזקה ובסופות</td></tr>
-      <tr><td>🚡 רכבל השאואינסלנד</td><td>ג׳ 24.8</td><td>✅ בחופש הגדול פתוח 9:00–18:00 (בשאר השנה עד 17:00)</td></tr>
-      <tr><td>🦌 Steinwasen-Park</td><td>ד׳ 25.8</td><td>✅ כל יום 10:00–18:00 בעונה</td></tr>
-      <tr><td>🚠 רכבל הבלכן</td><td>ו׳ 27.8</td><td>✅ פועל בקיץ. לבדוק את השעות באתר</td></tr>
-      <tr><td>💦 מפלי טריברג</td><td>שבת 28.8</td><td>✅ פתוח תמיד. משלמים בכניסה בערך 9:00–19:00</td></tr>
-      <tr><td>🛷 מגלשת ההרים בגוטאך</td><td>שבת 28.8</td><td>✅ כל יום 10:00–18:00, לפי מזג האוויר</td></tr>
-    </table>
-  </div>
-</section>
-
 <section id="costs">
   <h2 class="sec">💰 סיכום עלויות</h2>
   <p class="sec-sub">ההוצאות הקבועות לפי ההזמנות: מלונות ‎€3,813‎ (‎₪13,045‎), טיסות ‎₪10,528‎ ורכב ‎€1,135‎ (‎₪3,894‎), בסך הכול ‎₪27,467‎. לחישוב הוספנו דלק, חניה וויניטה, כניסה לאטרקציות וארוחות (בלי הסופר). ברירת המחדל: 2 מבוגרים, 2 ילדים בגילי 6–15 וילד אחד בן 3–5. אפשר לשנות כאן את מספר המשתתפים ואת שער היורו, והסכומים בכל הימים יתעדכנו.</p>
@@ -1723,14 +1705,12 @@ window.CATALOG = [
 
 /* ---------- webcams: link cards ---------- */
 window.CAMS = [
-  { n: "🚡 פסגת הפלדברג", e: "🏔️", when: "ראשון 22.8", href: "https://www.bergfex.com/feldberg/webcams/" },
-  { n: "🌲 אגם טיטיזה", e: "⛴️", when: "כל השבוע", href: "https://www.google.com/search?q=Titisee+webcam+live" },
-  { n: "🛷 האזנהורן, טודנאו", e: "🛷", when: "שני 23.8", href: "https://www.google.com/search?q=Hasenhorn+Todtnau+webcam" },
-  { n: "🚡 פסגת השאואינסלנד", e: "🚡", when: "שלישי 24.8", href: "https://www.google.com/search?q=Schauinsland+Bergstation+webcam" },
-  { n: "🚠 פסגת הבלכן", e: "🚠", when: "שישי 27.8", href: "https://www.google.com/search?q=Belchen+Schwarzwald+webcam" },
-  { n: "💦 מפלי הריין", e: "💦", when: "שבת 21.8", href: "https://www.google.com/search?q=Rheinfall+webcam+live" },
-  { n: "🌷 קונסטנץ ואגם בודן", e: "⛵", when: "שישי–שבת", href: "https://www.google.com/search?q=Konstanz+Hafen+webcam" },
-  { n: "⛪ שטרסבורג", e: "⛪", when: "שני 16.8", href: "https://www.google.com/search?q=Strasbourg+webcam+live+cath%C3%A9drale" }
+  { n: "🚡 פסגת הפלדברג", e: "🏔️", when: "ראשון 22.8", href: "https://www.schwarzwaldportal.com/en/Feldberg-webcam.html" },
+  { n: "🌲 אגם טיטיזה", e: "⛴️", when: "כל השבוע", href: "https://www.schwarzwaldportal.com/en/webcam-titisee.html" },
+  { n: "🛷 האזנהורן, טודנאו", e: "🛷", when: "שני 23.8", href: "https://www.tourispo.com/webcams/attraction/hasenhorn-coaster-in-todtnau.html" },
+  { n: "🚡 פסגת השאואינסלנד", e: "🚡", when: "שלישי 24.8", href: "https://tourispo.de/webcam/schauinsland-hofgrund.htm" },
+  { n: "🚠 פסגת הבלכן", e: "🚠", when: "שישי 27.8", href: "https://tourispo.de/webcam/belchen-im-schwarzwald.htm" },
+  { n: "🌷 קונסטנץ ואגם בודן", e: "⛵", when: "שישי–שבת", href: "https://www.feratel.com/en/webcams/germany/konstanz-bodensee.html" }
 ];
 </script>
 <script>

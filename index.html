@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script>
 /* Photos: "wiki:Title" / "wiki:de:Title" = the lead image of a Wikipedia article (REST API, CORS-enabled),
+   "commons:File name.jpg" = a Wikimedia Commons file,
    "img/..." or "https://..." = our own file. Every photo has a list of candidates and falls back to an emoji. */
 window.CAR_IMG = "wiki:Volkswagen Passat (B9)|wiki:de:VW Passat B9|wiki:Volkswagen Passat";
 window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
@@ -32,6 +33,10 @@ window.isOwnImg = function(name){ return /^(https?:\/\/|img\/)/.test(name); };
   }
   window.resolveImg = function(name, w){
     if (isOwnImg(name)) return Promise.resolve({ src: name });
+    if (/^commons:/.test(name)){ // a Wikimedia Commons file by name
+      var f = encodeURIComponent(name.slice(8).trim().replace(/ /g, "_"));
+      return Promise.resolve({ src: "https://commons.wikimedia.org/wiki/Special:FilePath/" + f + "?width=" + w, page: "https://commons.wikimedia.org/wiki/File:" + f });
+    }
     var wk = wiki(name);
     if (!wk) return Promise.reject();
     var key = wk.lang + ":" + wk.title;
@@ -555,7 +560,7 @@ img.img-failed{display:none}
 <body>
 
 <header class="hero">
-  <div class="ph" data-img="wiki:Titisee|wiki:de:Titisee|wiki:Black Forest" data-fallback="🌲"></div>
+  <div class="ph" data-img="img/hero.jpg|commons:Titisee-blick von hochfirst.jpg|wiki:de:Feldsee|commons:Mummelsee01.jpg|commons:Schluchsee.jpg|wiki:Titisee|wiki:Black Forest" data-min="1400" data-fallback="🌲"></div>
   <div class="hero-inner">
     <span class="kicker">🇩🇪🇫🇷🇨🇭 ראשון 15.8 – ראשון 29.8 · <b>היער השחור</b><br><b>אלזס, אגם קונסטנץ ופרנקפורט</b></span>
     <h1>הטיול שלנו ליער השחור<br><span class="sub">היידלברג · אלזס · אגם קונסטנץ · טיטיזה</span></h1>
@@ -1754,8 +1759,17 @@ window.CAMS = [
     }
     img._fail = function(){ box.classList.add("failed"); img.remove(); };
 
+    var minW = +box.getAttribute("data-min") || 0;
+    if (minW) img._fail = function(){
+      if (img._best){ img.classList.remove("img-failed"); img.onerror = null; img.onload = function(){ img.classList.add("ok"); }; img.src = img._best.src; }
+      else { box.classList.add("failed"); img.remove(); }
+    };
     function start(){
       fillImg(img, list, width, function(r){
+        if (minW && img.naturalWidth < minW){
+          if (!img._best || img.naturalWidth > img._best.w) img._best = { src: img.src, w: img.naturalWidth };
+          img.onerror(); return; // try the next candidate
+        }
         img.classList.add("ok");
         if (!r.page) return;
         var a = document.createElement("a");

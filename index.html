@@ -456,7 +456,7 @@ footer a{color:var(--muted)}
   .flt-st{font-size:.68rem;white-space:normal;text-align:center}
   .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
   .stat{min-width:0;padding:8px 10px}
-  .hero-stats .stat:last-child{grid-column:1/-1}
+  .hero-stats .stat:last-child:nth-child(odd){grid-column:1/-1}
   .stat b{font-size:1.15rem}
   .car-thumb.lg{width:56px;height:34px}
   .actions{gap:8px}
@@ -597,6 +597,7 @@ img.img-failed{display:none}
     </div>
     <div class="hero-stats">
       <div class="stat"><b>15</b><span>ימים</span></div>
+      <div class="stat"><b id="statAttr">32</b><span>אטרקציות</span></div>
       <div class="stat"><b>4</b><span>מלונות</span></div>
       <div class="stat"><span data-car="lg"></span><b>VW Passat</b><span>סטיישן</span></div>
       <div class="stat"><b id="statKm">~1,770</b><span>ק״מ נסיעה</span></div>
@@ -1356,7 +1357,7 @@ img.img-failed{display:none}
           <li>היידלברג (טירה ורכבל): €11 / €5.50 · Batorama: כ־€16 / €8.50 · הר הקופים: כ־€12 / €8 · שייט בקולמר: כ־€7 / €3.50</li>
           <li>לינדט: 17 פרנק למבוגר, 10 לילד 8–15, מתחת לגיל 8 בחינם · מיינאו: כ־€29 למבוגר, ילדים עד 12 בחינם · מפלי הריין (תצפית וסירה לסלע): כ־€20 / €10 · מוזיאון פיפ״א (חלופה ליום גשום, לא נספר בסכום): כרטיס משפחתי 69 פרנק (2 מבוגרים + 2 ילדים 7–15), מתחת לגיל 7 בחינם</li>
           <li>בכרטיס האדום (₪0): הגשר התלוי בטודנאו (בלי המפל), Steinwasen-Park, רכבל הפלדברג והמגדל, Fundorena, Tatzmania, Fun Park ו־Aqua Fun בשוכזה, הרכבות והאוטובוסים, ושייט בטיטיזה</li>
-          <li>בהנחה בכרטיס: Hasenhorn Coaster (כ־€11 / €8.50 לפני ההנחה), רכבל הבלכן, Badeparadies (4 שעות, 30% הנחה: בערך €26 למבוגר ו־€19 לילד) · גרביים ל־Fundorena: כ־€4 לילד · בתשלום: שאואינסלנד (€15 / €10, אם לא כלול), שעון הקוקייה (סמלי) וגוטאך (שתי נסיעות, כ־€9 / €7)</li>
+          <li>בהנחה בכרטיס: Hasenhorn Coaster (כ־€11 / €8.50, ואחרי 20% הנחה כ־€8.80 / €6.80), רכבל הבלכן, Badeparadies (4 שעות, 30% הנחה: בערך €26 למבוגר ו־€19 לילד) · גרביים ל־Fundorena: כ־€4 לילד · בתשלום: שאואינסלנד (€15 / €10, אם לא כלול), שעון הקוקייה (סמלי) וגוטאך (שתי נסיעות, כ־€9 / €7)</li>
           <li>חניה ואגרות: כולל ויניטה שוויצרית (40 פרנק, כ־€43) ביום 6</li>
           <li>ארוחות: צהריים במסעדה (כ־€17 למבוגר, כ־€10 לילד) וערב קל (כ־€10 / €7). הילד בן ה־3 לא נספר. ארוחות הבוקר במלונות לא נכללות</li>
           <li>דלק: VW Passat Variant, וברירת המחדל היא דיזל. בדיזל כ־6 ל׳/100 ק״מ ובבנזין כ־7.2 ל׳/100 ק״מ. זו צריכה בפועל עם משפחה מלאה, מזוודות ונסיעה בהרים. הקניות בסופר והמזכרות לא נכללות</li>
@@ -1937,6 +1938,9 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
   upd();
 })();
 
+/* ---------- hero: number of attractions on the route ---------- */
+(function(){ var el = document.getElementById("statAttr"); if (el) el.textContent = document.querySelectorAll(".day .timeline small.bk").length; })();
+
 /* ---------- sticky nav: scroll-spy ---------- */
 (function(){
   var nav = document.getElementById("daynav");
@@ -1987,7 +1991,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     fifa:     { name: "מוזיאון פיפ״א (כרטיס משפחתי, 69 פרנק)", p: [18.5, 18, 0] },
     feld:     { name: "רכבל הפלדברג ומגדל (בכרטיס)",      p: [0, 0, 0] },
     tboat:    { name: "שייט בטיטיזה (בכרטיס)",            p: [0, 0, 0] },
-    hasen:    { name: "Hasenhorn Coaster (נסיעה אחת)",    p: [11, 8.5, 0] },
+    hasen:    { name: "Hasenhorn Coaster (נסיעה אחת, כ־20% הנחה בכרטיס)", p: [8.8, 6.8, 0] },
     todfall:  { name: "הגשר התלוי בטודנאו (בכרטיס)",        p: [0, 0, 0] },
     schau:    { name: "רכבל השאואינסלנד",                 p: [15, 10, 0] },
     stein:    { name: "Steinwasen-Park (בכרטיס)",         p: [0, 0, 0] },

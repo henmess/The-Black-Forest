@@ -1340,7 +1340,7 @@ img.img-failed{display:none}
       <div class="inputs">
         <label>מבוגרים<input type="number" id="inAdults" min="0" max="10" value="2"></label>
         <label>ילדים 6–15<input type="number" id="inKids" min="0" max="10" value="2"></label>
-        <label>ילדים 3–5 (לא נספרים בארוחות)<input type="number" id="inSmall" min="0" max="10" value="1"></label>
+        <label>ילדים 3–5<input type="number" id="inSmall" min="0" max="10" value="1"></label>
         <label>שער יורו (₪)<input type="number" id="inRate" min="1" max="10" step="0.01" value="3.42"></label>
         <label><span>הרכב: VW Passat Variant<span data-car="sm"></span></span><select id="inFuelType"><option value="petrol">בנזין (1.5 eTSI)</option><option value="diesel" selected>דיזל (2.0 TDI)</option></select></label>
         <label>מחיר דלק לליטר (€)<input type="number" id="inFuel" min="0.5" max="5" step="0.01" value="1.65"></label>
@@ -1358,7 +1358,7 @@ img.img-failed{display:none}
           <li>בכרטיס האדום (₪0): הגשר התלוי בטודנאו (בלי המפל), Steinwasen-Park, רכבל הפלדברג והמגדל, Fundorena, Tatzmania, Fun Park ו־Aqua Fun בשוכזה, הרכבות והאוטובוסים, ושייט בטיטיזה</li>
           <li>בהנחה בכרטיס: Hasenhorn Coaster (כ־€11 / €8.50 לפני ההנחה), רכבל הבלכן, Badeparadies (4 שעות, 30% הנחה: בערך €26 למבוגר ו־€19 לילד) · גרביים ל־Fundorena: כ־€4 לילד · בתשלום: שאואינסלנד (€15 / €10, אם לא כלול), שעון הקוקייה (סמלי) וגוטאך (שתי נסיעות, כ־€9 / €7)</li>
           <li>חניה ואגרות: כולל ויניטה שוויצרית (40 פרנק, כ־€43) ביום 6</li>
-          <li>ארוחות: צהריים במסעדה (כ־€17 למבוגר, כ־€10 לילד) וערב קל (כ־€10 / €7). הילד בגיל 3–5 לא נספר. ארוחות הבוקר במלונות לא נכללות</li>
+          <li>ארוחות: צהריים במסעדה (כ־€17 למבוגר, כ־€10 לילד) וערב קל (כ־€10 / €7). לילד בן 3 מנת ילדים קטנה (כ־€6 בצהריים, €4 בערב). ארוחות הבוקר במלונות לא נכללות</li>
           <li>דלק: VW Passat Variant, וברירת המחדל היא דיזל. בדיזל כ־6 ל׳/100 ק״מ ובבנזין כ־7.2 ל׳/100 ק״מ. זו צריכה בפועל עם משפחה מלאה, מזוודות ונסיעה בהרים. הקניות בסופר והמזכרות לא נכללות</li>
         </ul>
       </div>
@@ -1981,7 +1981,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     colboat:  { name: "שייט בקולמר",                     p: [7, 3.5, 0] },
     singes:   { name: "הר הקופים",                        p: [12, 8, 0] },
     rulan:    { name: "רולנטיקה",                         p: [50, 47, 0] },
-    lindt:    { name: "בית השוקולד של לינדט",             p: [18, 10.5, 0] },
+    lindt:    { name: "בית השוקולד של לינדט (רק מגיל 8 משלמים)", p: [18, 5.25, 0] },
     mainau:   { name: "אי מיינאו",                        p: [29, 0, 0] },
     rhein:    { name: "מפלי הריין: תצפית וסירה לסלע",     p: [20, 10, 0] },
     fifa:     { name: "מוזיאון פיפ״א (כרטיס משפחתי, 69 פרנק)", p: [18.5, 18, 0] },
@@ -1998,7 +1998,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     gutach:   { name: "מגלשת ההרים בגוטאך (2 נסיעות)",    p: [9, 7, 0] },
     actionf:  { name: "Action Forest: חבלים ולייזר טאג (בכרטיס)", p: [0, 0, 0] },
     bade:     { name: "Badeparadies, 4 שעות (30% הנחה בכרטיס)", p: [26, 19, 10] },
-    fundo:    { name: "Fundorena (בכרטיס) · גרביים לטרמפולינות", p: [0, 4, 4] },
+    fundo:    { name: "Fundorena (בכרטיס) · גרביים לטרמפולינות", p: [0, 4, 0] },
     vita:     { name: "תרמה Vita Classica (משוער, לבדוק מחירי ילדים)", p: [24, 14, 0] },
     tatz:     { name: "Tatzmania (בכרטיס)", p: [0, 0, 0] },
     funpark:  { name: "Fun Park ו־Aqua Fun בשוכזה (בכרטיס)", p: [0, 0, 0] },
@@ -2007,7 +2007,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
     funny:    { name: "Funny World (בכרטיס)", p: [0, 0, 0] }
   };
   // lunch / dinner: "rest" = restaurant, "light" = pizza / snack bar, "home" = nothing to pay
-  var MEAL = { rest: [17, 10], light: [10, 7], home: [0, 0] };
+  var MEAL = { rest: [17, 10, 6], light: [10, 7, 4], home: [0, 0, 0] }; // adult, child 6–15, child 3–5
   var DAYS = {
     1:  { lat: 49.410, lon: 8.715, place: "היידלברג", drive: "~2:45", km: 245, parking: 10, attr: ["heidel"], wx: "☀️ 26°/15°", lunch: "rest", dinner: "light" },
     2:  { lat: 48.582, lon: 7.751, place: "שטרסבורג", drive: "~1:40", km: 110, parking: 5, attr: ["bato"], wx: "☀️ 26°/15°", lunch: "rest", dinner: "light" },
@@ -2084,7 +2084,7 @@ document.querySelectorAll("dialog.menu-dlg").forEach(function(d){
         return sum + c;
       }, 0);
       var f = day.km * perKm;
-      var meals = [day.lunch, day.dinner].reduce(function(sum, m){ return sum + MEAL[m][0]*a + MEAL[m][1]*k; }, 0);
+      var meals = [day.lunch, day.dinner].reduce(function(sum, m){ return sum + MEAL[m][0]*a + MEAL[m][1]*k + MEAL[m][2]*s; }, 0);
       tot.attr += at; tot.fuel += f; tot.park += day.parking; tot.km += day.km; tot.meals += meals;
 
       var el = document.querySelector('.daysum[data-day="'+d+'"]');

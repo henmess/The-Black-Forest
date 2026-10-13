@@ -9,6 +9,10 @@
         {
           "d": "2026-10-11",
           "p": 13434
+        },
+        {
+          "d": "2026-10-13",
+          "p": 13486
         }
       ],
       "name": "✈️ טיסות אל על LY357 / LY358",
@@ -44,6 +48,10 @@
         {
           "d": "2026-10-11",
           "p": 443
+        },
+        {
+          "d": "2026-10-13",
+          "p": 444
         }
       ],
       "name": "✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)",
@@ -53,5 +61,5 @@
       "link": "https://hrewards.com/de/zleep-hotel-frankfurt-airport-kelsterbach"
     }
   },
-  "checked": "2026-10-11T11:27:53.212Z"
+  "checked": "2026-10-13T12:46:53.444Z"
 }

@@ -25,7 +25,10 @@ Never use any other agency or aggregator.
 
 Children's ages for every search: 3, 7, 10 (for the DiMas room for 2+2, use the two older children: 7 and 10).
 For Singen and Frankfurt (Zleep), the price is the sum of the two rooms (one for 3, one for 2).
-If the exact room type or conditions are not offered, take the closest match and say what differs (`note`).
+If the exact room (capacity for our party) or conditions are not offered, do NOT add it to `history` (the page would show a false drop).
+Put it in `items.<id>.other_room` ({d, p, src, room}) and set `error` explaining that no matching room was found today.
+Small differences (e.g. room name, bed type) are fine if the room fits the whole party: then record it and explain in `note`.
+Always compare totals including VAT; mention local/city tax in `note` if it is excluded.
 
 ## How to check
 1. Open each official site with Playwright (Chromium is pre-installed; launch with

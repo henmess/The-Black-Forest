@@ -66,14 +66,7 @@
       "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail"
     },
     "titisee": {
-      "history": [
-        {
-          "d": "2026-10-16",
-          "p": 6816,
-          "src": "booking.com",
-          "eur": 1960.24
-        }
-      ],
+      "history": [],
       "name": "🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות)",
       "paid": 7537,
       "quotes": {
@@ -85,7 +78,14 @@
       "exact": false,
       "fare": "⚠️ לא אותו חדר: Superior זוגי עם מרפסת ונוף לאגם (24 מ״ר, מיטה זוגית; 2 מבוגרים + 2 ילדים, בת ה־3 חינם) · ארוחת בוקר · ביטול חינם · דרך Booking.com (באתר מריטים אין חדר פנוי ל־5)",
       "note": "אתר מריטים: אין זמינות לחדר אחד ל־2+3 בתאריכים. מחיר Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס עירוני 4€ לאדם ללילה לא כלול. Agoda: אין זמינות, Hotels.com חסום.",
-      "link": "https://reservations.maritim.com/titisee-hotel/book/accommodations?adults=2&childage=3,7,10&children=3&datein=08/21/2027&dateout=08/28/2027&domain=www.maritim.com"
+      "link": "https://reservations.maritim.com/titisee-hotel/book/accommodations?adults=2&childage=3,7,10&children=3&datein=08/21/2027&dateout=08/28/2027&domain=www.maritim.com",
+      "other_room": {
+        "d": "2026-10-16",
+        "p": 6816,
+        "src": "booking.com",
+        "room": "Superior זוגי עם מרפסת (24 מ״ר) – קטן מחדר משפחה ל־5"
+      },
+      "error": "אין היום חדר משפחה ל־5 פנוי (לא באתר מריטים ולא ב־Booking). נמצא רק חדר קטן יותר ב־₪6,816, שאינו בר השוואה"
     },
     "frankfurt": {
       "history": [

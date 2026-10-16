@@ -16,9 +16,10 @@ Never book, hold, log in or enter personal or payment details. Only search and r
 | rust | DiMas Hotel Ettenheim-Rust (dimas-hotel.de) | 15–19.8.2027, 4 nights | 1 family room, 2 adults + 2 children | free cancellation + breakfast | 3421 |
 | singen | Holiday Inn Express Singen (ihg.com) | 19–21.8.2027, 2 nights | 2 rooms: one for 3, one for 2 | free cancellation + breakfast | 1505 |
 | titisee | Maritim TitiseeHotel (maritim.de) | 21–28.8.2027, 7 nights | 1 family room for 5 (2 adults + children 3, 7, 10) | free cancellation + breakfast | 7537 |
+| frankfurt | Zleep Hotel Frankfurt Airport, Kelsterbach (zleep.com) | 28–29.8.2027, 1 night | 2 rooms: one for 3, one for 2 | free cancellation + breakfast | 582 |
 
 Children's ages for every search: 3, 7, 10 (for the DiMas room for 2+2, use the two older children: 7 and 10).
-For Singen, the price is the sum of the two rooms.
+For Singen and Frankfurt (Zleep), the price is the sum of the two rooms (one for 3, one for 2).
 If the exact room type or conditions are not offered, take the closest match and say what differs (`note`).
 
 ## How to check
@@ -36,7 +37,10 @@ Update `data/prices.json` (keep its format; the page reads it):
   to `items.<id>.history`. If today's date is already there, replace it. Remove that item's `error`.
 - Set `items.<id>.link` to the official page that shows this search, when the site has such a link.
 - On failure: set `items.<id>.error` to a short reason in Hebrew (e.g. "האתר חסם את הבדיקה", "התאריכים עוד לא פתוחים להזמנה") and leave the history as is.
-- Set the top-level `updated` to now (ISO time).
+- Set `items.<id>.fare` to a short Hebrew description of what was compared (room, breakfast, cancellation), e.g. "2 חדרים (3+2) · ארוחת בוקר · ביטול חינם · מהאתר של המלון".
+- History entries without `src` come from the old Google tracker (other rooms and conditions). The first time you write an item,
+  move those entries to `items.<id>.old_history` so the chart compares like for like.
+- Set the top-level `checked` to now (ISO time); the page shows it as the last check.
 
 Then publish exactly as CLAUDE.md says (commit, `git fetch origin && git merge origin/ccr-8e4e6093-8lwruz`,
 push to the working branch and to `ccr-8e4e6093-8lwruz`). Commit only `data/prices.json`.

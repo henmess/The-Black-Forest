@@ -1,8 +1,8 @@
 name: Price tracker
 
+# Replaced by the daily price-checker agent (.claude/agents/price-checker.md).
+# Kept for manual runs only.
 on:
-  schedule:
-    - cron: "17 5 */2 * *"   # every 2 days, ~07:17/08:17 Israel time
   workflow_dispatch: {}
 
 permissions:

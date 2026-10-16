@@ -14,5 +14,4 @@
 
 ## מעקב מחירים
 
-`.github/workflows/prices.yml` רץ כל יומיים, מריץ את `scripts/check-prices.mjs` (בודק ב־Google Flights / Google Hotels דרך SerpApi) ושומר את התוצאות ב־`data/prices.json`. האתר מציג אותן בכרטיס "📉 מעקב מחירים".
-כדי להפעיל: להוסיף ב־Settings → Secrets and variables → Actions סוד בשם `SERPAPI_KEY` עם המפתח מ־serpapi.com (ואם רוצים גיבוי דרך Booking.com, גם `RAPIDAPI_KEY`). אפשר להריץ ידנית מלשונית Actions → Price tracker → Run workflow.
+הסוכן `.claude/agents/price-checker.md` רץ כל יום ממשימה מתוזמנת. הוא בודק את המחירים ישירות באתר של אל על ובאתרי המלונות (לא דרך בוקינג), לאותם חדרים ותנאים שהזמנו, ושומר את התוצאות ב־`data/prices.json`. האתר מציג אותן בכרטיס "📉 מעקב מחירים". ה־GitHub Action הישן (`prices.yml`, דרך SerpApi) נשאר רק להרצה ידנית.

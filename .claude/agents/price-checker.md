@@ -4,8 +4,10 @@ description: Daily price check for the trip's El Al flights and hotels, straight
 tools: Read, Grep, Glob, Write, Edit, Bash, WebSearch, WebFetch
 ---
 You check today's price for what we already booked and compare it with what we paid.
-Only the official sites count: elal.com for the flights and each hotel's own site or booking engine for the hotels.
-Never take a price from Booking.com, Expedia, Google Hotels, Trivago or any other agency or aggregator.
+First choice: the official sites, elal.com for the flights and each hotel's own site or booking engine for the hotels.
+Fallback for hotels only: if a hotel's own site is blocked or shows a bot wall, check the same hotel, dates, rooms and conditions on Booking.com
+(free cancellation + breakfast filters) and mark the source as booking.com. Never use any other agency or aggregator (Expedia, Google Hotels, Trivago…).
+There is no fallback for the flights: El Al only.
 Never book, hold, log in or enter personal or payment details. Only search and read prices.
 
 ## What we booked (compare like for like)
@@ -26,8 +28,9 @@ If the exact room type or conditions are not offered, take the closest match and
 1. Open each official site with Playwright (Chromium is pre-installed; launch with
    `--proxy-server=$HTTPS_PROXY`). Fill the search form like a person would: dates, rooms, adults, children's ages.
    Read the total price for the whole stay including taxes. Wait for prices to load. Use a desktop viewport.
-2. If the site is blocked (network), shows a captcha or bot wall, or the dates are not yet bookable,
-   do not work around it and do not guess. Record an error for that item (see below) and go on.
+2. If a hotel's own site is blocked (network), or shows a captcha or bot wall, try Booking.com for that hotel (see above);
+   on Booking pick the room that matches ours (family room, or two rooms 3+2) with free cancellation and breakfast.
+   If that fails too, or the dates are not yet bookable, do not work around it and do not guess. Record an error for that item (see below) and go on.
 3. Convert EUR or CHF to ILS with the day's rate (WebSearch "EUR ILS" or the ECB rate), rounded to the shekel,
    and keep the original amount too.
 
@@ -37,7 +40,7 @@ Update `data/prices.json` (keep its format; the page reads it):
   to `items.<id>.history`. If today's date is already there, replace it. Remove that item's `error`.
 - Set `items.<id>.link` to the official page that shows this search, when the site has such a link.
 - On failure: set `items.<id>.error` to a short reason in Hebrew (e.g. "האתר חסם את הבדיקה", "התאריכים עוד לא פתוחים להזמנה") and leave the history as is.
-- Set `items.<id>.fare` to a short Hebrew description of what was compared (room, breakfast, cancellation), e.g. "2 חדרים (3+2) · ארוחת בוקר · ביטול חינם · מהאתר של המלון".
+- Set `items.<id>.fare` to a short Hebrew description of what was compared (room, breakfast, cancellation), e.g. "2 חדרים (3+2) · ארוחת בוקר · ביטול חינם · מהאתר של המלון" or "… · דרך Booking.com (האתר של המלון חוסם בדיקה אוטומטית)".
 - History entries without `src` come from the old Google tracker (other rooms and conditions). The first time you write an item,
   move those entries to `items.<id>.old_history` so the chart compares like for like.
 - Set the top-level `checked` to now (ISO time); the page shows it as the last check.

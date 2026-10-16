@@ -23,25 +23,26 @@
       "paid": 10528,
       "exact": true,
       "fare": "המחיר באתר אל על לתעריף הזול לכל 5 הנוסעים",
-      "link": "https://www.google.com/travel/flights?hl=en&gl=il&curr=ILS&tfs=CBwQAhoiEgoyMDI3LTA4LTE1MgJMWWoHCAESA1RMVnIHCAESA0ZSQRoiEgoyMDI3LTA4LTI5MgJMWWoHCAESA0ZSQXIHCAESA1RMVkABQAFAAkACQAJIAXABmAEB&tfu=EgIIAQ"
+      "link": "https://www.google.com/travel/flights?hl=en&gl=il&curr=ILS&tfs=CBwQAhoiEgoyMDI3LTA4LTE1MgJMWWoHCAESA1RMVnIHCAESA0ZSQRoiEgoyMDI3LTA4LTI5MgJMWWoHCAESA0ZSQXIHCAESA1RMVkABQAFAAkACQAJIAXABmAEB&tfu=EgIIAQ",
+      "error": "האתר הרשמי חסום ברשת של סביבת הבדיקה"
     },
     "rust": {
       "history": [],
       "name": "🎢 <bdi>DiMas Hotel Ettenheim-Rust</bdi> (4 לילות)",
       "paid": 3421,
-      "error": "no price on Google (Booking fallback needs RAPIDAPI_KEY)"
+      "error": "האתר הרשמי חסום ברשת של סביבת הבדיקה"
     },
     "singen": {
       "history": [],
       "name": "🌷 <bdi>Holiday Inn Express Singen</bdi> (2 לילות)",
       "paid": 1505,
-      "error": "no price on Google (Booking fallback needs RAPIDAPI_KEY)"
+      "error": "האתר הרשמי חסום ברשת של סביבת הבדיקה"
     },
     "titisee": {
       "history": [],
       "name": "🌲 <bdi>Maritim TitiseeHotel</bdi> (7 לילות)",
       "paid": 7537,
-      "error": "no price on Google (Booking fallback needs RAPIDAPI_KEY)"
+      "error": "האתר הרשמי חסום ברשת של סביבת הבדיקה"
     },
     "frankfurt": {
       "history": [
@@ -66,8 +67,9 @@
       "paid": 582,
       "exact": true,
       "fare": "חדר משפחתי (2 מבוגרים + 2 ילדים) · ביטול חינם · בלי ארוחת בוקר",
-      "link": "https://hrewards.com/de/zleep-hotel-frankfurt-airport-kelsterbach"
+      "link": "https://hrewards.com/de/zleep-hotel-frankfurt-airport-kelsterbach",
+      "error": "האתר הרשמי חסום ברשת של סביבת הבדיקה"
     }
   },
-  "checked": "2026-10-15T10:02:41.594Z"
+  "checked": "2026-10-16T05:54:16.872Z"
 }

@@ -139,8 +139,12 @@ data.items ||= {};
 if (!KEY) { console.log("SERPAPI_KEY not set — skipping"); process.exit(0); }
 if (today >= "2027-08-15") { console.log("Trip has started — nothing to track"); process.exit(0); }
 
+// ONLY=flights (set in the workflow): hotels are checked by the price-checker agent instead
+const ONLY = process.env.ONLY ? process.env.ONLY.split(",") : null;
+const RUN = ONLY ? ITEMS.filter(it => ONLY.includes(it.id)) : ITEMS;
+
 let ok = 0;
-for (const it of ITEMS) {
+for (const it of RUN) {
   const rec = data.items[it.id] ||= { history: [] };
   Object.assign(rec, { name: it.name, paid: it.paid });
   try {
@@ -151,7 +155,7 @@ for (const it of ITEMS) {
       catch (e) { console.log("  google:", e.message, "-> trying Xotelo"); r = { ...(await xotelo(it.params)), link: undefined }; }
     }
     rec.history = rec.history.filter(h => h.d !== today);
-    rec.history.push({ d: today, p: Math.round(r.price) });
+    rec.history.push({ d: today, p: Math.round(r.price), src: it.kind === "flight" ? "google-flights" : "google-hotels" });
     rec.history = rec.history.slice(-120);
     rec.exact = r.exact;
     for (const k of ["room", "fare", "fares", "via"]) { if (r[k]) rec[k] = r[k]; else delete rec[k]; }
@@ -166,4 +170,4 @@ for (const it of ITEMS) {
 }
 data.checked = new Date().toISOString();
 await writeFile(FILE, JSON.stringify(data, null, 2) + "\n");
-console.log(`done: ${ok}/${ITEMS.length}`);
+console.log(`done: ${ok}/${RUN.length}`);

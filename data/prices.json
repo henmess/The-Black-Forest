@@ -41,7 +41,7 @@
         "hotels.com": null,
         "agoda": null
       },
-      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · אתר המלון עוד לא פתוח לתאריכים, ב־Booking.com וב־Agoda אין זמינות, Hotels.com חוסם בדיקה אוטומטית",
+      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · אתר המלון עוד לא פתוח לתאריכים (כל אוגוסט–ספטמבר 2027 מסומן לא זמין), Booking.com חסם את הבדיקה, ב־Agoda החיפוש נכשל, Hotels.com חסום",
       "link": "https://reservation.one.dirs21.de/dimas-hotelde/result?&sets=%5B%7B%22occupancy%22%3A%7B%22adultCount%22%3A2%2C%22children%22%3A%5B7%2C10%5D%7D%2C%22uuid%22%3A%22%22%7D%5D&range=2027-08-15,2027-08-19&show_results=true"
     },
     "singen": {
@@ -57,13 +57,14 @@
       "paid": 1505,
       "quotes": {
         "hotel": null,
-        "booking.com": 1533,
+        "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
       "fare": "2 חדרים (Queen עם ספה ל־3 + Standard ל־2) · ארוחת בוקר · ביטול חינם · דרך Booking.com (האתר של IHG חוסם בדיקה אוטומטית)",
       "note": "מחיר Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס תיירות/ספא (אם יש) לא כלול. ב־Agoda אין זמינות, Hotels.com חסום.",
-      "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail"
+      "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail",
+      "error": "האתר חסם את הבדיקה (IHG ו־Booking.com חסמו, ב־Agoda החיפוש נכשל, Hotels.com חסום)"
     },
     "titisee": {
       "history": [],
@@ -71,7 +72,7 @@
       "paid": 7537,
       "quotes": {
         "hotel": null,
-        "booking.com": 6816,
+        "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
@@ -85,13 +86,19 @@
         "src": "booking.com",
         "room": "Superior זוגי עם מרפסת (24 מ״ר) – קטן מחדר משפחה ל־5"
       },
-      "error": "אין היום חדר משפחה ל־5 פנוי (לא באתר מריטים ולא ב־Booking). נמצא רק חדר קטן יותר ב־₪6,816, שאינו בר השוואה"
+      "error": "אין היום חדר משפחה ל־5 פנוי באתר מריטים (21–27.8 תפוס); Booking.com חסם את הבדיקה, ב־Agoda החיפוש נכשל. החדר הקטן (₪6,816) נבדק לאחרונה ב־16.10 ואינו בר השוואה"
     },
     "frankfurt": {
       "history": [
         {
           "d": "2026-10-16",
           "p": 754,
+          "src": "hrewards.com",
+          "eur": 217.0
+        },
+        {
+          "d": "2026-10-17",
+          "p": 756,
           "src": "hrewards.com",
           "eur": 217.0
         }
@@ -120,13 +127,13 @@
         }
       ],
       "quotes": {
-        "hotel": 754,
-        "booking.com": 789,
+        "hotel": 756,
+        "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
-      "note": "מחיר לא־חבר (לחברי H Rewards: 198.50€). Booking.com: 212€ + 7% מע״מ. Agoda: אין זמינות, Hotels.com חסום."
+      "note": "מחיר לא־חבר: Apartment ל־3 141€ + Standard ל־2 76€, כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.4822. Booking.com חסם את הבדיקה, ב־Agoda החיפוש נכשל, Hotels.com חסום."
     }
   },
-  "checked": "2026-10-16T08:02:50.518Z"
+  "checked": "2026-10-17T04:09:14.000Z"
 }

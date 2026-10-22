@@ -87,7 +87,7 @@
         "agoda": null
       },
       "fare": "2 חדרים (Queen עם ספה ל־3 + Standard ל־2) · ארוחת בוקר · ביטול חינם · דרך Booking.com (האתר של IHG חוסם בדיקה אוטומטית)",
-      "note": "המחיר האחרון (16.10) מ־Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס תיירות/ספא (אם יש) לא כלול. 21.10: Agoda – \"Sold out\" ל־2 חדרים בתאריכים.",
+      "note": "המחיר האחרון (16.10) מ־Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס תיירות/ספא (אם יש) לא כלול. 22.10: Agoda – \"Sold out\" ל־2 חדרים בתאריכים.",
       "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail",
       "error": "לא נמצא היום מחיר תואם: IHG ו־Booking.com חסמו את הבדיקה, ב־Agoda המלון מסומן \"Sold out\" ל־2 חדרים, Hotels.com חסום (429)"
     },
@@ -150,6 +150,12 @@
           "p": 756,
           "src": "hrewards.com",
           "eur": 217
+        },
+        {
+          "d": "2026-10-22",
+          "p": 754,
+          "src": "hrewards.com",
+          "eur": 217
         }
       ],
       "name": "✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)",
@@ -176,13 +182,13 @@
         }
       ],
       "quotes": {
-        "hotel": 756,
+        "hotel": 754,
         "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
-      "note": "מחיר לא־חבר: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.4853 (20.10). באתר נשארו רק 2 חדרי Apartment. Booking.com חסם את הבדיקה, Hotels.com לא נטען (429). ב־Agoda המלון מסומן \"Sold out\" בתאריכים."
+      "note": "מחיר לא־חבר: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.4726 (21.10). באתר נשאר רק חדר Apartment אחד. Booking.com חסם את הבדיקה, Hotels.com לא נטען (429). ב־Agoda המלון מסומן \"Sold out\" בתאריכים."
     }
   },
-  "checked": "2026-10-21T08:44:05.121Z"
+  "checked": "2026-10-22T04:02:54.000Z"
 }

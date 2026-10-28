@@ -96,7 +96,7 @@
         "hotels.com": null,
         "agoda": null
       },
-      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · באתר המלון 15–19.8.2027 מסומן \"fully booked\" (התאריכים עוד סגורים), ב־Booking.com \"לא זמין בתאריכים\", ב־Agoda \"Sold out\", Hotels.com לא נטען (502)",
+      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · 28.10: באתר המלון 15–19.8.2027 מסומן \"fully booked\" (גם ל־2 מבוגרים בלבד – התאריכים עוד סגורים), ב־Agoda \"Sold out\", Booking.com חסם את הבדיקה (403), Hotels.com לא נטען (502)",
       "link": "https://reservation.one.dirs21.de/dimas-hotelde/result?&sets=%5B%7B%22occupancy%22%3A%7B%22adultCount%22%3A2%2C%22children%22%3A%5B7%2C10%5D%7D%2C%22uuid%22%3A%22%22%7D%5D&range=2027-08-15,2027-08-19&show_results=true"
     },
     "singen": {
@@ -117,9 +117,9 @@
         "agoda": null
       },
       "fare": "2 חדרים (Queen עם ספה ל־3 + Standard ל־2) · ארוחת בוקר · ביטול חינם · דרך Booking.com (האתר של IHG חוסם בדיקה אוטומטית)",
-      "note": "המחיר האחרון (16.10) מ־Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס תיירות/ספא (אם יש) לא כלול. 27.10: IHG – Access Denied, ב־Booking.com המלון \"לא זמין בתאריכים\", Agoda – \"Sold out\", Hotels.com לא נטען (502).",
+      "note": "המחיר האחרון (16.10) מ־Booking.com הוצג בלי מע״מ; נוסף 7% מע״מ. מס תיירות/ספא (אם יש) לא כלול. 28.10: IHG – Access Denied (403), Booking.com חסם את הבדיקה (403), Agoda – \"Sold out\", Hotels.com לא נטען (502).",
       "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail",
-      "error": "לא נמצא היום מחיר תואם: IHG חסם את הבדיקה, ב־Booking.com המלון לא זמין בתאריכים, ב־Agoda \"Sold out\", Hotels.com לא נטען"
+      "error": "לא נמצא היום מחיר תואם: IHG ו־Booking.com חסמו את הבדיקה, ב־Agoda \"Sold out\", Hotels.com לא נטען"
     },
     "titisee": {
       "history": [],
@@ -133,7 +133,7 @@
       },
       "exact": false,
       "fare": "⚠️ לא אותו חדר: Superior זוגי עם מרפסת ונוף לאגם (24 מ״ר, מיטה זוגית; 2 מבוגרים + 2 ילדים, בת ה־3 חינם) · ארוחת בוקר · ביטול חינם · דרך Booking.com (באתר מריטים אין חדר פנוי ל־5)",
-      "note": "אתר מריטים 27.10: אין זמינות לחדר אחד ל־2+3 בלילות 22–27.8. מחיר Booking.com (16.10) הוצג בלי מע״מ; נוסף 7% מע״מ. מס עירוני 4€ לאדם ללילה לא כלול. 27.10: Agoda – \"Sold out\", Booking.com חסם את הבדיקה (403), Hotels.com לא נטען (502).",
+      "note": "אתר מריטים 28.10: אין זמינות לחדר אחד ל־2+3 בלילות 22–27.8. מחיר Booking.com (16.10) הוצג בלי מע״מ; נוסף 7% מע״מ. מס עירוני 4€ לאדם ללילה לא כלול. 28.10: Agoda – \"Sold out\", Booking.com חסם את הבדיקה (403), Hotels.com לא נטען (502).",
       "link": "https://reservations.maritim.com/titisee-hotel/book/accommodations?adults=2&childage=3,7,10&children=3&datein=08/21/2027&dateout=08/28/2027&domain=www.maritim.com",
       "other_room": {
         "d": "2026-10-16",
@@ -216,6 +216,12 @@
           "p": 748,
           "src": "hrewards.com",
           "eur": 217
+        },
+        {
+          "d": "2026-10-28",
+          "p": 738,
+          "src": "hrewards.com",
+          "eur": 217
         }
       ],
       "name": "✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)",
@@ -242,13 +248,13 @@
         }
       ],
       "quotes": {
-        "hotel": 748,
+        "hotel": 738,
         "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
-      "note": "מחיר לא־חבר: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.4458 (26.10). באתר נשאר חדר Apartment אחד בלבד. 27.10: ב־Booking.com המלון \"לא זמין בתאריכים\", Hotels.com לא נטען (502), ב־Agoda המלון מסומן \"Sold out\"."
+      "note": "מחיר לא־חבר: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.4003 (27.10). באתר נשאר חדר Apartment אחד בלבד. 28.10: ב־Booking.com המלון \"לא זמין בתאריכים\", ב־Agoda \"Sold out\", Hotels.com לא נטען (502)."
     }
   },
-  "checked": "2026-10-27T09:11:12.413Z"
+  "checked": "2026-10-28T05:18:00.245Z"
 }

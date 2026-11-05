@@ -136,7 +136,7 @@
         "hotels.com": null,
         "agoda": null
       },
-      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · 4.11: באתר המלון 15–19.8.2027 עדיין \"fully booked\" (כל אוגוסט–ספטמבר 2027 מסומנים לא זמינים); Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"There was a problem completing your search\" (לא נבדק שוב)",
+      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · 5.11: באתר המלון 15–19.8.2027 עדיין \"fully booked\" (כל אוגוסט–ספטמבר 2027 מסומנים לא זמינים); Booking.com – \"This property is unavailable on our site for your dates\" (בתוצאות החיפוש); Agoda – \"Sold out on your dates\"; Hotels.com לא נטען (502)",
       "link": "https://reservation.one.dirs21.de/dimas-hotelde/result?&sets=%5B%7B%22occupancy%22%3A%7B%22adultCount%22%3A2%2C%22children%22%3A%5B7%2C10%5D%7D%2C%22uuid%22%3A%22%22%7D%5D&range=2027-08-15,2027-08-19&show_results=true"
     },
     "singen": {
@@ -163,9 +163,9 @@
         "agoda": null
       },
       "fare": "2 חדרים (Queen נגיש עם ספה ל־3 + Queen Top Floor ל־2) · ארוחת בוקר · ביטול חינם · דרך Agoda (האתר של IHG חוסם בדיקה אוטומטית)",
-      "note": "4.11: IHG – Access Denied (403); Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"There was a problem completing your search\" (לא נבדק שוב). המחיר האחרון כולל מסים (1.11 ב־Agoda): 542€.",
+      "note": "5.11: IHG – Access Denied (403); Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"Sold out on your dates\" ל־2 חדרים (2 מבוגרים + ילדים 3, 7, 10), גם ברישום הכפול של המלון. המחיר האחרון כולל מסים (1.11 ב־Agoda): 542€.",
       "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail",
-      "error": "אין היום מחיר להשוואה: IHG ו־Booking.com חסמו, Hotels.com לא נטען, Agoda החזיר שגיאת חיפוש"
+      "error": "אין היום מחיר להשוואה: IHG ו־Booking.com חסמו, Hotels.com לא נטען, ב־Agoda המלון מסומן כמלא לתאריכים"
     },
     "titisee": {
       "history": [],
@@ -179,7 +179,7 @@
       },
       "exact": false,
       "fare": "⚠️ אין חדר תואם: חיפשנו חדר משפחה אחד ל־5 (2 מבוגרים + ילדים 3, 7, 10) · ארוחת בוקר · ביטול חינם. Booking.com מציע רק 2 חדרים (Classic + Superior) – לא בר השוואה",
-      "note": "אתר מריטים 4.11: עדיין אין זמינות לחדר אחד ל־2+3 בלילות 22–27.8 (21.8 ו־28.8 פתוחים). Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"There was a problem completing your search\" (לא נבדק שוב). החדר האחר (2 חדרים, Booking.com) נבדק לאחרונה ב־30.10. מס עירוני 4€ לאדם ללילה לא כלול.",
+      "note": "אתר מריטים 5.11: עדיין אין זמינות לחדר אחד ל־2+3 בלילות 22–27.8 (21.8 ו־28.8 פתוחים, 392€ ללילה). Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"Sold out on your dates\" לחדר אחד ל־2+3. החדר האחר (2 חדרים, Booking.com) נבדק לאחרונה ב־30.10. מס עירוני 4€ לאדם ללילה לא כלול.",
       "link": "https://reservations.maritim.com/titisee-hotel/book/accommodations?adults=2&childage=3,7,10&children=3&datein=08/21/2027&dateout=08/28/2027&domain=www.maritim.com",
       "other_room": {
         "d": "2026-10-30",
@@ -188,7 +188,7 @@
         "eur": 3009,
         "room": "2 חדרים (Classic זוגי + Superior עם מרפסת ונוף לאגם) – לא חדר משפחה אחד ל־5"
       },
-      "error": "אין היום חדר משפחה ל־5 פנוי: באתר מריטים אין זמינות; Booking.com חסם, Hotels.com לא נטען, Agoda החזיר שגיאה"
+      "error": "אין היום חדר משפחה ל־5 פנוי: באתר מריטים ובאגודה אין זמינות; Booking.com חסם, Hotels.com לא נטען"
     },
     "frankfurt": {
       "history": [
@@ -311,6 +311,12 @@
           "p": 766,
           "src": "hrewards.com",
           "eur": 217
+        },
+        {
+          "d": "2026-11-05",
+          "p": 773,
+          "src": "hrewards.com",
+          "eur": 217
         }
       ],
       "name": "✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)",
@@ -337,13 +343,13 @@
         }
       ],
       "quotes": {
-        "hotel": 766,
+        "hotel": 773,
         "booking.com": null,
         "hotels.com": null,
-        "agoda": null
+        "agoda": 1205
       },
-      "note": "מחיר לא־חבר באתר המלון: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.5292 (3.11). המחיר באירו לא השתנה. 4.11: באתר נותר חדר Apartment אחד בלבד. Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502); Agoda – \"There was a problem completing your search\" (לא נבדק שוב)."
+      "note": "מחיר לא־חבר באתר המלון: Apartment ל־3 141€ + Standard ל־2 76€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.5641 (4.11). המחיר באירו לא השתנה. 5.11: באתר נותר חדר Apartment אחד בלבד. Agoda: 2 חדרי Standard family (עד 3 אורחים) עם ארוחת בוקר וביטול חינם – 156€ לחדר ללילה לפני מסים, 338€ כולל מסים (יקר יותר). Booking.com חסם את הבדיקה (403 – זוהה כרובוט); Hotels.com לא נטען (502)."
     }
   },
-  "checked": "2026-11-04T11:14:07.388Z"
+  "checked": "2026-11-05T05:23:00.000Z"
 }

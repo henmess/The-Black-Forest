@@ -142,6 +142,11 @@
           "d": "2026-11-09",
           "p": 15488,
           "src": "google-flights"
+        },
+        {
+          "d": "2026-11-10",
+          "p": 15427,
+          "src": "google-flights"
         }
       ],
       "name": "✈️ טיסות אל על LY357 / LY358",
@@ -412,5 +417,5 @@
       "note": "10.11 מחיר לא־חבר באתר המלון (H Rewards): Apartment ל־3 141€ + Standard Double/Twin ל־2 76€ = 217€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). שער ECB 3.5490 (9.11). המחיר באירו לא השתנה. נותר חדר Apartment אחרון. Booking.com חסם את הבדיקה (403); Hotels.com לא נטען (502); ב־Agoda החיפוש נכשל (\"There was a problem completing your search\")."
     }
   },
-  "checked": "2026-11-10T05:10:47+00:00"
+  "checked": "2026-11-10T11:25:51.232Z"
 }

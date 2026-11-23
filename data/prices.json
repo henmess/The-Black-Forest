@@ -207,6 +207,11 @@
           "d": "2026-11-22",
           "p": 17970,
           "src": "google-flights"
+        },
+        {
+          "d": "2026-11-23",
+          "p": 17950,
+          "src": "google-flights"
         }
       ],
       "name": "✈️ טיסות אל על LY357 / LY358",
@@ -603,5 +608,5 @@
       "note": "23.11 מחיר לא־חבר באתר המלון (H Rewards): Apartment ל־3 (מבוגר + ילדים 3, 7) 141€ + Standard Double or Twin ל־2 (מבוגר + ילד 10) 76€ = 217€ (Flex עם ארוחת בוקר, ביטול חינם עד 18:00 ביום ההגעה), כולל מע״מ ומס עירוני (לחברי H Rewards: 198.50€). נותר חדר Apartment אחד. Agoda: Standard family ל־3 156€ + Double or Twin ל־2 80€ = 236€ \"Per night before taxes\", כלומר 252.52€ עם 7% מע״מ, בלי מס עירוני (ארוחת בוקר, ביטול חינם; Agoda מסמנת את הילדים \"0-5 years\"). Booking.com: \"This property is unavailable on our site for your dates\" ל־2 חדרים (2 מבוגרים + 3 ילדים); Hotels.com לא נטען (upstream request failed / 429). שער ECB 3.6737 (20.11, האחרון שפורסם)."
     }
   },
-  "checked": "2026-11-23T05:18:02.175Z"
+  "checked": "2026-11-23T13:16:50.405Z"
 }

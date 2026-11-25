@@ -236,7 +236,7 @@
         "hotels.com": null,
         "agoda": null
       },
-      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · 24.11: באתר המלון \"Unfortunately, we are fully booked for the desired period\"; Booking.com: \"This property is unavailable on our site for your dates\" (בבדיקה חוזרת הדף לא נטען עם החיפוש); Agoda: \"There was a problem completing your search\" (לא נטען); Hotels.com: upstream request failed (502/429).",
+      "fare": "חדר משפחתי (2 מבוגרים + ילדים 7, 10) · ארוחת בוקר · ביטול חינם · 25.11: באתר המלון \"Unfortunately, we are fully booked for the desired period\"; Booking.com: \"This property is unavailable on our site for your dates\"; Agoda: \"Sold out on your dates!\"; Hotels.com: חסום (429).",
       "link": "https://reservation.one.dirs21.de/dimas-hotelde/result?&sets=%5B%7B%22occupancy%22%3A%7B%22adultCount%22%3A2%2C%22children%22%3A%5B7%2C10%5D%7D%2C%22uuid%22%3A%22%22%7D%5D&range=2027-08-15,2027-08-19&show_results=true"
     },
     "singen": {
@@ -316,10 +316,10 @@
         "hotels.com": null,
         "agoda": null
       },
-      "fare": "2 חדרים (חדר ל־3 + חדר ל־2) · ארוחת בוקר · ביטול חינם · 23.11: אין זמינות ב־Agoda וב־Booking.com (האתר של IHG חוסם בדיקה אוטומטית)",
-      "note": "24.11: אתר IHG – Access Denied; Booking.com: \"This property is unavailable on our site for your dates\" (בבדיקה חוזרת הדף לא נטען עם החיפוש); Agoda: \"There was a problem completing your search\" (לא נטען); Hotels.com: upstream request failed (502/429). ההיסטוריה נשארה כמו שהיא.",
+      "fare": "2 חדרים (חדר ל־3 + חדר ל־2) · ארוחת בוקר · ביטול חינם · 25.11: אין זמינות ב־Agoda וב־Booking.com (האתר של IHG חוסם בדיקה אוטומטית)",
+      "note": "25.11: אתר IHG – Access Denied (403); Booking.com: \"This property is unavailable on our site for your dates\"; Agoda (2 חדרים, 2 מבוגרים + ילדים 3, 7, 10): \"Sold out on your dates!\"; Hotels.com: חסום (429). ההיסטוריה נשארה כמו שהיא.",
       "link": "https://www.ihg.com/holidayinnexpress/hotels/gb/en/singen/zqasg/hoteldetail",
-      "error": "אין היום מחיר ל־2 חדרים (3+2): אתר IHG חוסם בדיקה, ב־Booking.com המלון לא זמין, Agoda ו־Hotels.com לא נטענו"
+      "error": "אין היום מחיר ל־2 חדרים (3+2): אתר IHG חוסם בדיקה, ב־Booking.com וב־Agoda המלון לא זמין, Hotels.com חסום"
     },
     "titisee": {
       "history": [],
@@ -332,8 +332,8 @@
         "agoda": null
       },
       "exact": false,
-      "fare": "⚠️ אין חדר תואם: חיפשנו חדר משפחה אחד ל־5 (2 מבוגרים + ילדים 3, 7, 10) · ארוחת בוקר · ביטול חינם. 24.11: אין חדר כזה פנוי באתר מריטים ולא ב־Booking.com",
-      "note": "24.11: באתר מריטים אין זמינות לחדר אחד ל־2+3 בלילות 21–27.8 (20.8 ו־28.8 פתוחים). Booking.com: \"This property is unavailable on our site for your dates\" (בבדיקה חוזרת הדף לא נטען עם החיפוש); Agoda: \"There was a problem completing your search\" (לא נטען); Hotels.com: upstream request failed (502/429). ההצעה החלופית (other_room) היא מ־23.11 (Agoda, 2 חדרים זוגיים) ולא נבדקה היום. מס עירוני 4€ לאדם ללילה לא כלול.",
+      "fare": "⚠️ אין חדר תואם: חיפשנו חדר משפחה אחד ל־5 (2 מבוגרים + ילדים 3, 7, 10) · ארוחת בוקר · ביטול חינם. 25.11: אין חדר כזה פנוי באתר מריטים, ב־Booking.com וב־Agoda",
+      "note": "25.11: באתר מריטים אין זמינות לחדר אחד ל־2+3 בלילות 21–27.8 (20.8 ו־28.8 פתוחים). Booking.com: \"This property is unavailable on our site for your dates\"; Agoda (חדר אחד): \"Sold out on your dates!\"; ב־Agoda עם 2 חדרים מוצעים 2 חדרי Superior זוגיים עם ארוחת בוקר וביטול חינם מ־USD 330 לחדר ללילה לפני מסים (לא הצלחנו לקרוא סכום כולל, ולכן ההצעה החלופית (other_room) נשארה מ־23.11). Hotels.com: חסום (429). מס עירוני 4€ לאדם ללילה לא כלול.",
       "link": "https://reservations.maritim.com/titisee-hotel/book/accommodations?adults=2&childage=3,7,10&children=3&datein=08/21/2027&dateout=08/28/2027&domain=www.maritim.com",
       "other_room": {
         "d": "2026-11-23",
@@ -342,7 +342,7 @@
         "eur": 4508.98,
         "room": "2 חדרים Superior זוגיים עם מרפסת ונוף לאגם (ארוחת בוקר, ביטול חינם עד 14.8.2027) – לא חדר משפחה אחד ל־5"
       },
-      "error": "אין היום חדר משפחה ל־5 פנוי: לא באתר מריטים ולא ב־Booking.com; Agoda ו־Hotels.com לא נטענו"
+      "error": "אין היום חדר משפחה ל־5 פנוי: לא באתר מריטים, לא ב־Booking.com ולא ב־Agoda; Hotels.com חסום"
     },
     "frankfurt": {
       "history": [
@@ -585,6 +585,12 @@
           "p": 491,
           "src": "hrewards.com",
           "eur": 134
+        },
+        {
+          "d": "2026-11-25",
+          "p": 751,
+          "src": "hrewards.com",
+          "eur": 205
         }
       ],
       "name": "✈️ <bdi>Zleep Hotel Frankfurt Airport</bdi> (לילה)",
@@ -611,13 +617,13 @@
         }
       ],
       "quotes": {
-        "hotel": 491,
+        "hotel": 751,
         "booking.com": null,
         "hotels.com": null,
         "agoda": null
       },
-      "note": "24.11 באתר המלון (H Rewards), תעריף \"Opening Special incl. breakfast\" (ביטול חינם עד 18:00 ביום ההגעה): Apartment ל־3 (מבוגר + ילדים 3, 7) 77€ + Standard Double or Twin ל־2 (מבוגר + ילד 10) 57€ = 134€, כולל מע״מ ומס עירוני (4€). נותר חדר Apartment אחד. זה תעריף מבצע חדש; תעריף Flex עם ארוחת בוקר לא הוצג היום (Smart Special עם ארוחת בוקר, ביטול עד 3 ימים לפני: 130€ + 75€). Booking.com: \"This property is unavailable on our site for your dates\" (בבדיקה חוזרת הדף לא נטען עם החיפוש); Agoda: \"There was a problem completing your search\" (לא נטען); Hotels.com: upstream request failed (502/429). שער ECB 3.6643 (23.11)."
+      "note": "25.11 באתר המלון (H Rewards), תעריף \"Smart Special incl. breakfast\" (ביטול חינם עד 3 ימים לפני ההגעה), מחיר ללא חברות: Apartment ל־3 (מבוגר + ילדים 3, 7) 130€ + Standard Double or Twin ל־2 (מבוגר + ילד 10) 75€ = 205€, כולל מע״מ ומס עירוני. תעריף \"Opening Special\" (134€ אתמול) כבר לא מוצע; Flex עם ארוחת בוקר (ביטול עד 18:00 ביום ההגעה): 150€ + 85€. נותר חדר Apartment אחד. Booking.com: \"This property is unavailable on our site for your dates\"; Agoda: 2 חדרי Standard family עם ארוחת בוקר וביטול חינם מ־USD 159 לחדר ללילה לפני מסים (יקר יותר; לא הוצג סכום כולל, ולכן לא נרשם); Hotels.com: חסום (429). שער ECB 3.6618 (24.11)."
     }
   },
-  "checked": "2026-11-24T13:58:45.900Z"
+  "checked": "2026-11-25T05:17:46.794Z"
 }

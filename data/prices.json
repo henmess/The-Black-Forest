@@ -232,6 +232,11 @@
           "d": "2026-11-27",
           "p": 17799,
           "src": "google-flights"
+        },
+        {
+          "d": "2026-11-28",
+          "p": 17895,
+          "src": "google-flights"
         }
       ],
       "name": "✈️ טיסות אל על LY357 / LY358",
@@ -658,5 +663,5 @@
       "note": "28.11 באתר המלון (H Rewards), תעריף \"Smart Special incl. breakfast\" (ביטול חינם עד 3 ימים לפני ההגעה), מחיר ללא חברות: Apartment ל־3 (מבוגר + ילדים 3, 7) 130€ + Standard Double or Twin ל־2 (מבוגר + ילד 10) 75€ = 205€, כולל מע״מ ומס עירוני. Flex עם ארוחת בוקר (ביטול עד 18:00 ביום ההגעה): 150€ + 85€. נותר חדר Apartment אחד. Booking.com: \"This property is unavailable on our site for your dates\"; Agoda: בדף המלון \"Sold out!\" ל־2 חדרים (2 מבוגרים + ילדים 3, 7, 10); Hotels.com: לא נטען (upstream request failed). שער ECB 3.6261 (27.11)."
     }
   },
-  "checked": "2026-11-28T05:23:17.000Z"
+  "checked": "2026-11-28T12:00:25.255Z"
 }
